@@ -1,6 +1,5 @@
 import {
     IsEmail,
-    IsNotEmpty,
     IsString,
     MinLength,
     MaxLength,
@@ -11,39 +10,42 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
-export class CreateUserDto {
-    @ApiProperty({ example: 'John' })
+export class RegisterDto {
+    @ApiProperty({ example: 'John', description: 'First name of the user' })
     @IsString()
-    @IsNotEmpty()
     @MinLength(2)
     @MaxLength(50)
     @Transform(({ value }) => value?.trim())
     firstName: string;
 
-    @ApiProperty({ example: 'Doe' })
+    @ApiProperty({ example: 'Doe', description: 'Last name of the user' })
     @IsString()
-    @IsNotEmpty()
     @MinLength(2)
     @MaxLength(50)
     @Transform(({ value }) => value?.trim())
     lastName: string;
 
-    @ApiProperty({ example: 'hello@gmail.com' })
+    @ApiProperty({ example: 'user@example.com' })
     @IsEmail({}, { message: 'Please provide a valid email address' })
     @Transform(({ value }) => value?.toLowerCase().trim())
     email: string;
 
-    @ApiProperty({ example: 'StrongP@ss123', minLength: 6 })
+    @ApiProperty({
+        example: 'StrongP@ss123',
+        description:
+            'Password must contain uppercase, lowercase, number, and special character',
+        minLength: 8,
+    })
     @IsString()
-    @MinLength(6, { message: 'Password must be at least 6 characters long' })
-    @MaxLength(64, { message: 'Password must not exceed 64 characters' })
+    @MinLength(8)
+    @MaxLength(64)
     @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
         message:
-            'Password must contain uppercase, lowercase, and a number or special character',
+            'Password must contain at least one uppercase letter, one lowercase letter, and one number or special character',
     })
     password: string;
 
-    @ApiPropertyOptional({ example: ['user'] })
+    @ApiPropertyOptional({ example: ['user'], description: 'Roles to assign' })
     @IsOptional()
     @IsArray()
     @IsString({ each: true })

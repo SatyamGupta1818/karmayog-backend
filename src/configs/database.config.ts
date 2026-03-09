@@ -13,6 +13,6 @@ export const getDatabaseConfig = (config: ConfigService,): TypeOrmModuleOptions 
 
         autoLoadEntities: true,
         synchronize: true,
-        logging: true,
+        logging: false,
     };
 };

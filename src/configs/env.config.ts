@@ -21,6 +21,8 @@ export const envValidationSchema = Joi.object({
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30),
 
+    API_KEY: Joi.string().required()
+
 }).unknown(true);
 
 /**
@@ -50,6 +52,8 @@ export const configuration = () => ({
         refreshExpirationDays: Number(
             process.env.JWT_REFRESH_EXPIRATION_DAYS,
         ),
+        accessSecret: process.env.JWT_ACCESS_SECRET,
+        refreshSecret: process.env.JWT_REFRESH_SECRET
     },
 
     redis: {
@@ -59,4 +63,8 @@ export const configuration = () => ({
         password: process.env.REDIS_PASSWORD,
         db: Number(process.env.REDIS_DB),
     },
+
+    security: {
+        apiKey: process.env.API_KEY
+    }
 });
