@@ -16,8 +16,6 @@ import {
 
 import { AuthService } from './auth.service';
 
-// ✅ Import from the files that EXIST — jwt-auth.guard and jwt-refresh.guard
-// ❌ NOT from access.guard or refresh.guard (those are deleted)
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 
