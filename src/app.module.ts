@@ -7,6 +7,9 @@ import { UsersModule } from './modules/users/users.module';
 /** Database Module */
 import { DatabaseModule } from './database/database.module';
 
+/** Shared Module (Contains Email Service) */
+import { SharedModule } from './shared/shared.module';
+
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { configuration, envValidationSchema } from './configs/env.config';
@@ -15,10 +18,7 @@ import { HttpLoggerMiddleware } from './common/middlewares/http-logger.middlewar
 import { RequestIdMiddleware } from './common/middlewares/request-id.middleware';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all-execptions.filters';
-
-// NOTE: Auth is handled globally by CompositeAuthGuard in main.ts.
-// Only ThrottlerGuard stays here — it requires NestJS DI and cannot be
-// manually instantiated in main.ts like JWT/ApiKey guards.
+import { OrganizationModule } from './modules/organization/organization.module';
 
 @Module({
   imports: [
@@ -45,19 +45,19 @@ import { AllExceptionsFilter } from './common/filters/all-execptions.filters';
 
     LoggerModule,
     DatabaseModule,
+    SharedModule, // <-- Added SharedModule here
     AuthModule,
     UsersModule,
+    OrganizationModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-
     // Global rate limiting
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-
     // Global exception filter
     {
       provide: APP_FILTER,

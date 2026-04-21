@@ -21,7 +21,12 @@ export const envValidationSchema = Joi.object({
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30),
 
-    API_KEY: Joi.string().required()
+    API_KEY: Joi.string().required(),
+
+    MAIL_HOST: Joi.string().required(),
+    MAIL_PORT: Joi.string().required(),
+    MAIL_USER: Joi.string().required(),
+    MAIL_PASSWORD: Joi.string().required(),
 
 }).unknown(true);
 
@@ -66,5 +71,12 @@ export const configuration = () => ({
 
     security: {
         apiKey: process.env.API_KEY
+    },
+
+    email: {
+        host: process.env.MAIL_HOST,
+        port: process.env.MAIL_PORT,
+        mailUser: process.env.MAIL_USER,
+        mailPassword: process.env.MAIL_PASSWORD,
     }
 });

@@ -4,17 +4,18 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
-    BeforeInsert,
-    BeforeUpdate,
     Index,
+    ManyToOne,
+    JoinColumn,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import { Organization } from '../../organization/entities/organization.entity';
 
 export enum UserRole {
     SUPER_ADMIN = 'super-admin',
     ADMIN = 'admin',
     USER = 'user',
     MODERATOR = 'moderator',
+    OWNER = 'owner', // ✅ Added OWNER role
 }
 
 @Entity('users')
@@ -32,9 +33,16 @@ export class User {
     @Column({ type: 'varchar', unique: true, length: 255 })
     email: string;
 
-    // select: false — never returned in normal queries; use addSelect() explicitly
-    @Column({ type: 'varchar', length: 255, select: false })
-    password: string;
+    // Made nullable assuming OTP-only users might not have a password initially
+    @Column({ type: 'varchar', length: 255, select: false, nullable: true })
+    password?: string;
+
+    // ✅ Added missing fields referenced in the service
+    @Column({ name: 'mobile_no', type: 'varchar', length: 20, nullable: true })
+    mobileNo?: string;
+
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    designation?: string;
 
     @Column({ type: 'simple-array', default: UserRole.USER })
     roles: string[];
@@ -53,25 +61,20 @@ export class User {
 
     @Column({ type: 'varchar', nullable: true, select: false })
     hashedRefreshToken: string | null;
-    
+
     @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
     createdAt: Date;
 
     @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
     updatedAt: Date;
 
-    @BeforeInsert()
-    @BeforeUpdate()
-    async hashPassword(): Promise<void> {
-        if (this.password && !this.password.startsWith('$2b$')) {
-            this.password = await bcrypt.hash(this.password, 12);
-        }
-    }
-
-
-    async validatePassword(plainPassword: string): Promise<boolean> {
-        return bcrypt.compare(plainPassword, this.password);
-    }
+    // ✅ Added relationship to Organization
+    @ManyToOne(() => Organization, (organization) => organization.users, {
+        nullable: true,
+        onDelete: 'SET NULL',
+    })
+    @JoinColumn({ name: 'organization_id' })
+    organization: Organization;
 
     get fullName(): string {
         return `${this.firstName} ${this.lastName}`;

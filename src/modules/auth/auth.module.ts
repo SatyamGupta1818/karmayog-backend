@@ -14,10 +14,11 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 import { JwtAccessStrategy } from './strategies/access-tokern.strategy';
 import { JwtRefreshStrategy } from './strategies/refresh-token.strategy';
+import { Organization } from '../organization/entities/organization.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Organization]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}), // secrets provided per-call in auth.service.ts
   ],

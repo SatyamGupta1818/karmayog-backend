@@ -1,5 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
+import {
+    IsEmail,
+    IsNotEmpty,
+    IsString,
+    MinLength,
+    MaxLength,
+    Matches,
+    IsOptional,
+    IsArray,
+} from 'class-validator';
 
 export class TokensResponseDto {
     @ApiProperty({ description: 'JWT access token (short-lived: 15 minutes)' })
@@ -57,3 +67,9 @@ export class MessageResponseDto {
     @ApiProperty({ example: 'Operation completed successfully' })
     message: string;
 }
+
+export class OTPResponseDto {
+    @ApiProperty({ example: 'Operation completed successfully' })
+    message!: string;
+}
+

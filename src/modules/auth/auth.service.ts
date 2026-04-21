@@ -9,17 +9,22 @@ import {
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
-import { LoginDto } from './dto/login.dto';
 import { JwtPayload, Tokens } from './interfaces/jwt-payload.interface';
 import { User, UserRole } from '../users/entities/user.entity';
-import { RegisterDto } from './dto/register.dto';
-import { LoginResponseDto, TokensResponseDto } from './dto/auth-response.dto';
+import { Organization } from '../organization/entities/organization.entity';
+import { OTPResponseDto, TokensResponseDto } from './dto/auth-response.dto';
+import { OTPDto, RegisterOrganizationDto } from './dto/auth.dto';
+
+import { EmailService } from "../../shared/services/email.service";
+import { RedisService } from 'src/shared/cache/redis/redis.service';
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCK_DURATION_MINUTES = 15;
+const OTP_EXPIRY_MINUTES = 10;
 
 @Injectable()
 export class AuthService {
@@ -33,8 +38,11 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
+    private readonly redisService: RedisService
   ) {
     this.accessSecret = this.configService.getOrThrow<string>('JWT_ACCESS_SECRET');
     this.refreshSecret = this.configService.getOrThrow<string>('JWT_REFRESH_SECRET');
@@ -44,79 +52,77 @@ export class AuthService {
   }
 
 
-  async register(registerDto: RegisterDto): Promise<LoginResponseDto> {
-    const { email, password, firstName, lastName, roles } = registerDto;
+  /** ----------- Request OTP Service --------- */
+
+  async requestOTP(otpDto: OTPDto): Promise<OTPResponseDto> {
+    const { email } = otpDto;
 
     const existingUser = await this.userRepository.findOne({ where: { email } });
+    if (!existingUser) {
+      throw new ConflictException('Invalid Email');
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const hashedOtp = await bcrypt.hash(otp, 10);
+
+    const redisKey = `otp:${email}`;
+    const OTP_EXPIRY_SECONDS = 600;
+
+    await this.redisService.set(redisKey, hashedOtp, OTP_EXPIRY_SECONDS);
+
+    await this.emailService.sendOtpEmail(email, otp, `${existingUser.firstName} ${existingUser.lastName}`,);
+
+    this.logger.log(`OTP sent and cached for ${email}`);
+
+    return {
+      message: 'Check your email for the OTP. It expires in 10 minutes.',
+    };
+  }
+
+
+  /** ----------- Register Organization And User Service --------- */
+
+  async registerOrganization(dto: RegisterOrganizationDto): Promise<any> {
+    const { workEmail, firstName, lastName, mobileNo, designation, organizationName, organizationType, organizationSize, website, } = dto;
+
+    const existingUser = await this.userRepository.existsBy({ email: workEmail });
+
     if (existingUser) {
-      throw new ConflictException('An account with this email already exists');
+      throw new ConflictException('User with this email already exists');
     }
 
-    const user = this.userRepository.create({
-      firstName,
-      lastName,
-      email,
-      password,
-      roles: roles ?? [UserRole.USER],
+    return await this.dataSource.transaction(async (manager) => {
+      const organization = manager.create(Organization, {
+        organizationName,
+        organizationType,
+        organizationSize,
+        website,
+      });
+
+      const savedOrganization = await manager.save(organization);
+
+      // 2️⃣ Create User (Owner of Org)
+      const user = manager.create(User, {
+        firstName,
+        lastName,
+        email: workEmail,
+        mobileNo,
+        designation,
+        organization: savedOrganization,
+        roles: [UserRole.OWNER],
+      });
+
+      const savedUser = await manager.save(user);
+
+      return {
+        message: 'Organization registered successfully',
+        data: {
+          organization: savedOrganization,
+          user: savedUser.toSafeObject(),
+        },
+      };
     });
-
-    const savedUser = await this.userRepository.save(user);
-    this.logger.log(`New user registered: ${savedUser.email}`);
-
-    const tokens = await this.generateTokens(savedUser.id, savedUser.email, savedUser.roles);
-    await this.storeRefreshToken(savedUser.id, tokens.refreshToken);
-
-    return { user: savedUser.toSafeObject() as any, tokens };
   }
-
-
-  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
-    const { email, password } = loginDto;
-
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .addSelect('user.password')
-      .where('user.email = :email', { email })
-      .getOne();
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    if (!user.isActive) {
-      throw new ForbiddenException('Account has been deactivated. Please contact support.');
-    }
-
-    if (user.isLocked) {
-      const minutesLeft = Math.ceil(
-        (user.lockedUntil!.getTime() - Date.now()) / 60000,
-      );
-      throw new ForbiddenException(
-        `Account is temporarily locked. Try again in ${minutesLeft} minute(s).`,
-      );
-    }
-
-    const isPasswordValid = await user.validatePassword(password);
-
-    if (!isPasswordValid) {
-      await this.handleFailedLogin(user);
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    await this.userRepository.update(user.id, {
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      lastLoginAt: new Date(),
-    });
-
-    this.logger.log(`User logged in: ${user.email}`);
-
-    const tokens = await this.generateTokens(user.id, user.email, user.roles);
-    await this.storeRefreshToken(user.id, tokens.refreshToken);
-
-    return { user: user.toSafeObject() as any, tokens };
-  }
-
 
   async logout(userId: string): Promise<void> {
     const result = await this.userRepository.update(

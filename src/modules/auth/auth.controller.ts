@@ -21,45 +21,45 @@ import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 
 import { Public } from 'src/common/decorators/public.decorator';
 import { GetCurrentUser } from 'src/common/decorators/get-current-user.decorator';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 import {
   LoginResponseDto,
   TokensResponseDto,
   UserResponseDto,
   MessageResponseDto,
+  OTPResponseDto,
 } from './dto/auth-response.dto';
+import { OTPDto, RegisterOrganizationDto } from './dto/auth.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
-  // ── Register ──────────────────────────────────────────────────────────────
+
+  /** ----------------------------------  Request OTP ------------------------------------------ */
 
   @Public()
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Register a new user account' })
-  @ApiResponse({ status: 201, type: LoginResponseDto })
-  @ApiResponse({ status: 409, description: 'Email already in use' })
-  async register(@Body() registerDto: RegisterDto): Promise<LoginResponseDto> {
-    return this.authService.register(registerDto);
-  }
-
-  // ── Login ─────────────────────────────────────────────────────────────────
-
-  @Public()
-  @Post('login')
+  @Post('request-otp')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Authenticate user and receive tokens' })
+  @ApiOperation({ summary: 'Request OTP for Authentication' })
   @ApiResponse({ status: 200, type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
-    return this.authService.login(loginDto);
+  async requestOTP(@Body() otpDto: OTPDto): Promise<OTPResponseDto> {
+    return this.authService.requestOTP(otpDto)
   }
 
-  // ── Logout ────────────────────────────────────────────────────────────────
+
+
+  /** ------------------------------ Register Organization ------------------------------------ */
+  @Public()
+  @Post("register")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request OTP for Authentication' })
+  @ApiResponse({ status: 200, type: LoginResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  async registerOrganization(@Body() registerOrganizationDto: RegisterOrganizationDto) {
+    return this.authService.registerOrganization(registerOrganizationDto)
+  }
 
   @UseGuards(JwtAuthGuard)  // ✅ JwtAuthGuard from jwt-auth.guard.ts
   @Post('logout')
