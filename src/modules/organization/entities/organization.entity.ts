@@ -32,12 +32,12 @@ export class Organization {
     organizationSize: string;
 
     @Column({
-        name: 'website',
+        name: 'org_email',
         type: 'varchar',
         length: 255,
         nullable: true,
     })
-    website?: string;
+    orgEmail?: string;
 
     @Column({
         name: 'subscription_type',

@@ -19,6 +19,7 @@ import { RequestIdMiddleware } from './common/middlewares/request-id.middleware'
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all-execptions.filters';
 import { OrganizationModule } from './modules/organization/organization.module';
+import { RbacModule } from './modules/rbac/rbac.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { OrganizationModule } from './modules/organization/organization.module';
     AuthModule,
     UsersModule,
     OrganizationModule,
+    RbacModule,
   ],
   controllers: [AppController],
   providers: [

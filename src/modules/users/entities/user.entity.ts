@@ -9,15 +9,7 @@ import {
     JoinColumn,
 } from 'typeorm';
 import { Organization } from '../../organization/entities/organization.entity';
-
-export enum UserRole {
-    SUPER_ADMIN = 'super-admin',
-    ADMIN = 'admin',
-    USER = 'user',
-    MODERATOR = 'moderator',
-    OWNER = 'owner', // ✅ Added OWNER role
-}
-
+import { Role } from 'src/modules/rbac/entities/roles.entity';
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn('uuid')
@@ -33,19 +25,21 @@ export class User {
     @Column({ type: 'varchar', unique: true, length: 255 })
     email: string;
 
-    // Made nullable assuming OTP-only users might not have a password initially
     @Column({ type: 'varchar', length: 255, select: false, nullable: true })
     password?: string;
 
-    // ✅ Added missing fields referenced in the service
     @Column({ name: 'mobile_no', type: 'varchar', length: 20, nullable: true })
     mobileNo?: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
     designation?: string;
 
-    @Column({ type: 'simple-array', default: UserRole.USER })
-    roles: string[];
+    @ManyToOne(() => Role, (role) => role.users, {
+        nullable: false,
+        onDelete: 'RESTRICT',
+    })
+    @JoinColumn({ name: 'role_id' })
+    role: Role;
 
     @Column({ name: 'is_active', type: 'boolean', default: true })
     isActive: boolean;
@@ -68,13 +62,13 @@ export class User {
     @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
     updatedAt: Date;
 
-    // ✅ Added relationship to Organization
     @ManyToOne(() => Organization, (organization) => organization.users, {
         nullable: true,
         onDelete: 'SET NULL',
     })
     @JoinColumn({ name: 'organization_id' })
     organization: Organization;
+
 
     get fullName(): string {
         return `${this.firstName} ${this.lastName}`;
@@ -85,8 +79,10 @@ export class User {
         return new Date() < this.lockedUntil;
     }
 
+
     toSafeObject(): Partial<User> {
-        const { password, hashedRefreshToken, ...safe } = this as any;
-        return safe;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, hashedRefreshToken, ...safeUser } = this;
+        return safeUser;
     }
 }
