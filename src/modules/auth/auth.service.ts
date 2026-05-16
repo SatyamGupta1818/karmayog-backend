@@ -70,7 +70,7 @@ export class AuthService {
   ) {
     this.accessSecret = this.configService.getOrThrow<string>('JWT_ACCESS_SECRET');
     this.refreshSecret = this.configService.getOrThrow<string>('JWT_REFRESH_SECRET');
-    this.accessExpiresIn = this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m');
+    this.accessExpiresIn = this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '50m');
     this.refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d');
   }
 

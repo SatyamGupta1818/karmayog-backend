@@ -12,7 +12,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       host: this.config.get<string>('REDIS_HOST', '127.0.0.1'),
       port: this.config.get<number>('REDIS_PORT', 6379),
       password: this.config.get<string>('REDIS_PASSWORD'),
-      // Important: don't let the app hang forever if redis is down
       maxRetriesPerRequest: 3,
     });
   }
@@ -24,7 +23,6 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
     this.redisClient.on('ready', async () => {
       this.logger.log('✅ Redis: Connection established and ready');
-      // The "Ultimate Test" - send a ping to the server
       const response = await this.redisClient.ping();
       this.logger.log(`📡 Redis Ping Response: ${response}`);
     });
@@ -38,15 +36,31 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     this.redisClient.quit();
   }
 
-  async set(key: string, value: string, ttlSeconds: number): Promise<void> {
-    await this.redisClient.set(key, value, 'EX', ttlSeconds);
+  async set(key: string, value: any, ttlSeconds: number): Promise<void> {
+    const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+    await this.redisClient.set(key, stringValue, 'EX', ttlSeconds);
   }
 
-  async get(key: string): Promise<string | null> {
-    return this.redisClient.get(key);
+  async get<T = any>(key: string): Promise<T | null> {
+    const data = await this.redisClient.get(key);
+
+    if (!data) return null;
+
+    try {
+      return JSON.parse(data) as T;
+    } catch (err) {
+      return data as unknown as T;
+    }
   }
 
   async del(key: string): Promise<void> {
     await this.redisClient.del(key);
+  }
+
+  async delByPattern(pattern: string): Promise<void> {
+    const keys = await this.redisClient.keys(pattern);
+    if (keys.length > 0) {
+      await this.redisClient.del(...keys);
+    }
   }
 }

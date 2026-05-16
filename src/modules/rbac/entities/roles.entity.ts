@@ -18,6 +18,7 @@ export enum UserRole {
     MODERATOR = 'MODERATOR',
     TEAM_LEADER = 'TEAM_LEADER',
     USER = 'USER',
+    STAFF = 'STAFF',
 }
 
 @Entity('roles')
