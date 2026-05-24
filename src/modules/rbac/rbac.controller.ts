@@ -155,6 +155,6 @@ export class RbacController {
 
   @Get('me/permissions')
   getMyPermissions(@Req() req: any) {
-    return this.rbacService.getMyPermissions(req.user.id);
+    return this.rbacService.getMyPermissions(req.user.userId);
   }
 }
