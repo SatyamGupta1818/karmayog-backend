@@ -6,28 +6,48 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiSecurity, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto, UpdateUserDto, UserListQueryDto } from './dto/users.dto';
 import { Public } from 'src/common/decorators/public.decorator';
-import { RequireApiKey } from 'src/common/decorators/api-key.decorator';
 
 @ApiTags('Users')
-@Controller('users') // → /api/users
+@Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  @Public()
+  @Public() // Keeping it public as in original, adjust as necessary based on your auth guards
   @Post('create')
-  @ApiOperation({ summary: 'Create a new user (requires x-api-key header)' })
+  @ApiOperation({ summary: 'Create a new user' })
   @ApiResponse({ status: 201, description: 'User created successfully' })
-  @ApiResponse({ status: 400, description: 'Validation failed' })
-  @ApiResponse({ status: 401, description: 'API key is required' })
-  @ApiResponse({ status: 403, description: 'Invalid API key' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.createUser(createUserDto);
+  }
+
+  @Get('list')
+  @ApiOperation({ summary: 'Get list of users' })
+  findAll(@Query() query: UserListQueryDto) {
+    return this.usersService.findAll(query);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get user by id' })
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
+
+  @Patch('update/:id')
+  @ApiOperation({ summary: 'Update a user' })
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
+  }
+
+  @Delete('delete/:id')
+  @ApiOperation({ summary: 'Delete a user' })
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
   }
 }
