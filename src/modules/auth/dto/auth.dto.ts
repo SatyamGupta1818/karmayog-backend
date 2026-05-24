@@ -9,6 +9,7 @@ import {
   IsEnum,
   IsNumberString,
   Length,
+  IsUUID,
 } from 'class-validator';
 
 // ─── OTP ──────────────────────────────────────────────────────────────────────
@@ -103,4 +104,14 @@ export class RegisterOrganizationDto {
   @IsEmail()
   @IsNotEmpty()
   orgEmail: string;
+}
+
+export class SwitchOrganizationDto {
+  @ApiProperty({
+    example: '5f8f2b74-3ac8-4d76-8e0a-b7f0c89c52a7',
+    description: 'Target organization UUID to switch context to',
+  })
+  @IsUUID()
+  @IsNotEmpty()
+  orgId: string;
 }

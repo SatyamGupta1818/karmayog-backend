@@ -17,21 +17,31 @@ export class DepartmentsService {
     private readonly redisService: RedisService,
   ) {}
 
-  async create(createDepartmentDto: CreateDepartmentDto): Promise<Department> {
-    const existing = await this.departmentRepository.findOne({ where: { name: createDepartmentDto.name } });
-    if (existing) {
-      throw new BadRequestException('Department with this name already exists');
+  async create(createDepartmentDto: CreateDepartmentDto, orgId?: string): Promise<Department> {
+    if (!orgId) {
+      throw new BadRequestException('Organization is required to create a department');
     }
 
-    const department = this.departmentRepository.create(createDepartmentDto);
+    const existing = await this.departmentRepository.findOne({ 
+      where: { name: createDepartmentDto.name, organization: { id: orgId } } 
+    });
+    if (existing) {
+      throw new BadRequestException('Department with this name already exists in the organization');
+    }
+
+    const { orgId: _ignoredOrgId, ...departmentData } = createDepartmentDto;
+    const department = this.departmentRepository.create({
+      ...departmentData,
+      organization: { id: orgId },
+    });
     const saved = await this.departmentRepository.save(department);
     
     await this.clearCache();
     return saved;
   }
 
-  async findAll(query: DepartmentListQueryDto) {
-    const cacheKey = `${this.LIST_CACHE_PREFIX}${JSON.stringify(query)}`;
+  async findAll(query: DepartmentListQueryDto, orgId?: string) {
+    const cacheKey = `${this.LIST_CACHE_PREFIX}${orgId || 'all'}:${JSON.stringify(query)}`;
     const cachedData = await this.redisService.get(cacheKey);
     
     if (cachedData) {
@@ -44,6 +54,10 @@ export class DepartmentsService {
     const qb = this.departmentRepository.createQueryBuilder('department');
 
     qb.where('department.isDeleted = :isDeleted', { isDeleted: false });
+
+    if (orgId) {
+      qb.andWhere('department.organization_id = :orgId', { orgId });
+    }
 
     if (search) {
       qb.andWhere('department.name ILIKE :search OR department.description ILIKE :search', { search: `%${search}%` });
@@ -71,15 +85,22 @@ export class DepartmentsService {
     return result;
   }
 
-  async findOne(id: string): Promise<Department> {
-    const cacheKey = `${this.CACHE_PREFIX}${id}`;
+  async findOne(id: string, orgId?: string): Promise<Department> {
+    const cacheKey = this.getCacheKey(id, orgId);
     const cachedData = await this.redisService.get<Department>(cacheKey);
 
     if (cachedData) {
       return cachedData;
     }
 
-    const department = await this.departmentRepository.findOne({ where: { id, isDeleted: false } });
+    const whereClause: any = { id, isDeleted: false };
+    if (orgId) {
+      whereClause.organization = { id: orgId };
+    }
+    const department = await this.departmentRepository.findOne({
+      where: whereClause,
+      relations: ['organization'],
+    });
     
     if (!department) {
       throw new NotFoundException(`Department with ID "${id}" not found`);
@@ -89,25 +110,32 @@ export class DepartmentsService {
     return department;
   }
 
-  async update(id: string, updateDepartmentDto: UpdateDepartmentDto): Promise<Department> {
-    const department = await this.findOne(id);
+  async update(id: string, updateDepartmentDto: UpdateDepartmentDto, orgId?: string): Promise<Department> {
+    const department = await this.findOne(id, orgId);
 
     if (updateDepartmentDto.name && updateDepartmentDto.name !== department.name) {
-      const existing = await this.departmentRepository.findOne({ where: { name: updateDepartmentDto.name } });
+      const targetOrgId = orgId || department.organization?.id;
+      const existing = await this.departmentRepository.findOne({ 
+        where: {
+          name: updateDepartmentDto.name,
+          ...(targetOrgId ? { organization: { id: targetOrgId } } : {}),
+        },
+      });
       if (existing && existing.id !== id) {
-        throw new BadRequestException('Department with this name already exists');
+        throw new BadRequestException('Department with this name already exists in the organization');
       }
     }
 
-    Object.assign(department, updateDepartmentDto);
+    const { orgId: _ignoredOrgId, ...departmentData } = updateDepartmentDto as UpdateDepartmentDto & { orgId?: string };
+    Object.assign(department, departmentData);
     const updated = await this.departmentRepository.save(department);
 
     await this.clearCache(id);
     return updated;
   }
 
-  async remove(id: string): Promise<void> {
-    const department = await this.findOne(id);
+  async remove(id: string, orgId?: string): Promise<void> {
+    const department = await this.findOne(id, orgId);
     department.isDeleted = true;
     department.isActive = false;
     
@@ -118,8 +146,13 @@ export class DepartmentsService {
   private async clearCache(id?: string) {
     if (id) {
       await this.redisService.del(`${this.CACHE_PREFIX}${id}`);
+      await this.redisService.delByPattern(`${this.CACHE_PREFIX}*:${id}`);
     }
     // Delete all list caches
     await this.redisService.delByPattern(`${this.LIST_CACHE_PREFIX}*`);
+  }
+
+  private getCacheKey(id: string, orgId?: string) {
+    return `${this.CACHE_PREFIX}${orgId || 'all'}:${id}`;
   }
 }

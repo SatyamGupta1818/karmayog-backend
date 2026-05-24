@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsIn, IsInt, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsIn, IsInt, Min, IsUUID } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
 export class CreateDepartmentDto {
@@ -13,6 +13,10 @@ export class CreateDepartmentDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsUUID()
+  @IsOptional()
+  orgId?: string;
 }
 
 export class UpdateDepartmentDto {
@@ -58,4 +62,8 @@ export class DepartmentListQueryDto {
   @IsOptional()
   @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
+
+  @IsOptional()
+  @IsUUID()
+  orgId?: string;
 }

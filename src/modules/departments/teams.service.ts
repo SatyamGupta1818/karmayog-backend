@@ -20,29 +20,52 @@ export class TeamsService {
     private readonly redisService: RedisService,
   ) {}
 
-  async create(createTeamDto: CreateTeamDto): Promise<Team> {
-    const department = await this.departmentRepository.findOne({ where: { id: createTeamDto.departmentId, isDeleted: false } });
+  async create(createTeamDto: CreateTeamDto, orgId?: string): Promise<Team> {
+    const departmentWhere: any = { id: createTeamDto.departmentId, isDeleted: false };
+    if (orgId) {
+      departmentWhere.organization = { id: orgId };
+    }
+
+    const department = await this.departmentRepository.findOne({
+      where: departmentWhere,
+      relations: ['organization'],
+    });
     if (!department) {
       throw new NotFoundException(`Department with ID "${createTeamDto.departmentId}" not found`);
     }
 
+    const effectiveOrgId = orgId || department.organization?.id;
+    if (!effectiveOrgId) {
+      throw new BadRequestException('Organization is required to create a team');
+    }
+
     const existing = await this.teamRepository.findOne({ 
-      where: { name: createTeamDto.name, departmentId: createTeamDto.departmentId, isDeleted: false } 
+      where: {
+        name: createTeamDto.name,
+        departmentId: createTeamDto.departmentId,
+        organization: { id: effectiveOrgId },
+        isDeleted: false,
+      },
     });
     
     if (existing) {
       throw new BadRequestException('Team with this name already exists in the selected department');
     }
 
-    const team = this.teamRepository.create(createTeamDto);
+    const { orgId: _ignoredOrgId, ...teamData } = createTeamDto;
+    const team = this.teamRepository.create({
+      ...teamData,
+      department,
+      organization: { id: effectiveOrgId },
+    });
     const saved = await this.teamRepository.save(team);
     
     await this.clearCache();
     return saved;
   }
 
-  async findAll(query: TeamListQueryDto) {
-    const cacheKey = `${this.LIST_CACHE_PREFIX}${JSON.stringify(query)}`;
+  async findAll(query: TeamListQueryDto, orgId?: string) {
+    const cacheKey = `${this.LIST_CACHE_PREFIX}${orgId || 'all'}:${JSON.stringify(query)}`;
     const cachedData = await this.redisService.get(cacheKey);
     
     if (cachedData) {
@@ -56,6 +79,10 @@ export class TeamsService {
       .leftJoinAndSelect('team.department', 'department');
 
     qb.where('team.isDeleted = :isDeleted', { isDeleted: false });
+
+    if (orgId) {
+      qb.andWhere('team.organization_id = :orgId', { orgId });
+    }
 
     if (departmentId) {
       qb.andWhere('team.departmentId = :departmentId', { departmentId });
@@ -87,17 +114,22 @@ export class TeamsService {
     return result;
   }
 
-  async findOne(id: string): Promise<Team> {
-    const cacheKey = `${this.CACHE_PREFIX}${id}`;
+  async findOne(id: string, orgId?: string): Promise<Team> {
+    const cacheKey = this.getCacheKey(id, orgId);
     const cachedData = await this.redisService.get<Team>(cacheKey);
 
     if (cachedData) {
       return cachedData;
     }
 
-    const team = await this.teamRepository.findOne({ 
-      where: { id, isDeleted: false },
-      relations: ['department']
+    const whereClause: any = { id, isDeleted: false };
+    if (orgId) {
+      whereClause.organization = { id: orgId };
+    }
+
+    const team = await this.teamRepository.findOne({
+      where: whereClause,
+      relations: ['department', 'organization'],
     });
     
     if (!team) {
@@ -108,35 +140,61 @@ export class TeamsService {
     return team;
   }
 
-  async update(id: string, updateTeamDto: UpdateTeamDto): Promise<Team> {
-    const team = await this.findOne(id);
+  async update(id: string, updateTeamDto: UpdateTeamDto, orgId?: string): Promise<Team> {
+    const team = await this.findOne(id, orgId);
+    let targetDepartment: Department | null = null;
+    let targetOrgId = orgId || team.organization?.id;
 
     if (updateTeamDto.departmentId && updateTeamDto.departmentId !== team.departmentId) {
-      const department = await this.departmentRepository.findOne({ where: { id: updateTeamDto.departmentId, isDeleted: false } });
-      if (!department) {
+      const departmentWhere: any = { id: updateTeamDto.departmentId, isDeleted: false };
+      if (orgId) {
+        departmentWhere.organization = { id: orgId };
+      }
+
+      targetDepartment = await this.departmentRepository.findOne({
+        where: departmentWhere,
+        relations: ['organization'],
+      });
+      if (!targetDepartment) {
         throw new NotFoundException(`Department with ID "${updateTeamDto.departmentId}" not found`);
       }
+      targetOrgId = orgId || targetDepartment.organization?.id;
     }
 
     if (updateTeamDto.name) {
       const targetDepartmentId = updateTeamDto.departmentId || team.departmentId;
       const existing = await this.teamRepository.findOne({ 
-        where: { name: updateTeamDto.name, departmentId: targetDepartmentId, isDeleted: false } 
+        where: {
+          name: updateTeamDto.name,
+          departmentId: targetDepartmentId,
+          ...(targetOrgId ? { organization: { id: targetOrgId } } : {}),
+          isDeleted: false,
+        },
       });
       if (existing && existing.id !== id) {
         throw new BadRequestException('Team with this name already exists in the selected department');
       }
     }
 
-    Object.assign(team, updateTeamDto);
+    const { orgId: _ignoredOrgId, ...teamData } = updateTeamDto as UpdateTeamDto & { orgId?: string };
+    Object.assign(team, teamData);
+
+    if (targetDepartment) {
+      team.department = targetDepartment;
+      team.departmentId = targetDepartment.id;
+    }
+    if (targetOrgId) {
+      team.organization = { id: targetOrgId } as any;
+    }
+
     const updated = await this.teamRepository.save(team);
 
     await this.clearCache(id);
     return updated;
   }
 
-  async remove(id: string): Promise<void> {
-    const team = await this.findOne(id);
+  async remove(id: string, orgId?: string): Promise<void> {
+    const team = await this.findOne(id, orgId);
     team.isDeleted = true;
     team.isActive = false;
     
@@ -147,7 +205,12 @@ export class TeamsService {
   private async clearCache(id?: string) {
     if (id) {
       await this.redisService.del(`${this.CACHE_PREFIX}${id}`);
+      await this.redisService.delByPattern(`${this.CACHE_PREFIX}*:${id}`);
     }
     await this.redisService.delByPattern(`${this.LIST_CACHE_PREFIX}*`);
+  }
+
+  private getCacheKey(id: string, orgId?: string) {
+    return `${this.CACHE_PREFIX}${orgId || 'all'}:${id}`;
   }
 }

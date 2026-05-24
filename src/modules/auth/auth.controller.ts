@@ -20,6 +20,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Public } from '../../common/decorators/public.decorator';
 import { GetCurrentUser } from '../../common/decorators/get-current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
 
 import {
   LoginResponseDto,
@@ -29,8 +30,9 @@ import {
   OTPResponseDto,
   RegisterOrganizationResponseDto,
 } from './dto/auth-response.dto';
-import { OTPDto, RegisterOrganizationDto, VerifyOTPDto } from './dto/auth.dto';
-import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
+import { OTPDto, RegisterOrganizationDto, SwitchOrganizationDto, VerifyOTPDto } from './dto/auth.dto';
+import { JwtRefreshGuard } from '../../common/guards/jwt-refresh.guard';
+import { UserRole } from '../rbac/entities/roles.entity';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -144,6 +146,27 @@ export class AuthController {
     @GetCurrentUser('refreshToken') refreshToken: string,
   ): Promise<TokensResponseDto> {
     return this.authService.refreshTokens(userId, email, roles, refreshToken);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('switch-organization')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('access-token')
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Switch SUPER_ADMIN tenant context to another organization',
+    description:
+      'Updates the active organization for the current SUPER_ADMIN and returns fresh access and refresh tokens containing the new orgId.',
+  })
+  @ApiResponse({ status: 200, type: TokensResponseDto })
+  @ApiResponse({ status: 403, description: 'Only SUPER_ADMIN can switch organizations' })
+  @ApiResponse({ status: 404, description: 'Organization not found or inactive' })
+  async switchOrganization(
+    @GetCurrentUser('userId') userId: string,
+    @GetCurrentUser('roles') roles: string[],
+    @Body() dto: SwitchOrganizationDto,
+  ): Promise<TokensResponseDto> {
+    return this.authService.switchOrganization(userId, roles, dto.orgId);
   }
 
   // ──────────────────────────────────────────────────────────────────────────

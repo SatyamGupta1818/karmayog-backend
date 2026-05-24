@@ -11,7 +11,7 @@ import {
     JoinTable,
 } from 'typeorm';
 import { Organization } from '../../organization/entities/organization.entity';
-import { Role } from 'src/modules/rbac/entities/roles.entity';
+import { Role } from '../../rbac/entities/roles.entity';
 import { Department } from '../../departments/entities/department.entity';
 import { Team } from '../../departments/entities/team.entity';
 @Entity('users')

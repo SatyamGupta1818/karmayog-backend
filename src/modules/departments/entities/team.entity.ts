@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Department } from './department.entity';
+import { Organization } from '../../organization/entities/organization.entity';
 
 @Entity('teams')
 export class Team {
@@ -40,4 +41,11 @@ export class Team {
   })
   @JoinColumn({ name: 'department_id' })
   department: Department;
+
+  @ManyToOne(() => Organization, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 }

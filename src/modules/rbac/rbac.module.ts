@@ -10,7 +10,7 @@ import { Role } from './entities/roles.entity';
 import { User } from '../users/entities/user.entity';
 
 
-import { RedisModule } from 'src/shared/cache/redis/redis.module';
+import { RedisModule } from '../../shared/cache/redis/redis.module';
 import { RbacController } from './rbac.controller';
 
 @Module({

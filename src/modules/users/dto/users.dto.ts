@@ -63,6 +63,11 @@ export class CreateUserDto {
     @IsArray()
     @IsUUID('all', { each: true })
     teamIds?: string[];
+
+    @ApiPropertyOptional({ example: 'uuid-of-organization' })
+    @IsOptional()
+    @IsUUID()
+    orgId?: string;
     
     @ApiPropertyOptional({ example: true })
     @IsOptional()
@@ -106,6 +111,11 @@ export class UserListQueryDto {
     @IsOptional()
     @IsUUID()
     roleId?: string;
+
+    @ApiPropertyOptional({ example: 'uuid-of-organization' })
+    @IsOptional()
+    @IsUUID()
+    orgId?: string;
 
     @ApiPropertyOptional({ example: true })
     @IsOptional()

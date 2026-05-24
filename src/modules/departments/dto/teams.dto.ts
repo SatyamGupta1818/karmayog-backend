@@ -17,6 +17,10 @@ export class CreateTeamDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsUUID()
+  @IsOptional()
+  orgId?: string;
 }
 
 export class UpdateTeamDto {
@@ -70,4 +74,8 @@ export class TeamListQueryDto {
   @IsOptional()
   @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
+
+  @IsOptional()
+  @IsUUID()
+  orgId?: string;
 }

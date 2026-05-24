@@ -5,9 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Team } from './team.entity';
+import { Organization } from '../../organization/entities/organization.entity';
 
 @Entity('departments')
 export class Department {
@@ -37,4 +40,11 @@ export class Department {
 
   @OneToMany(() => User, (user) => user.department)
   users: User[];
+
+  @ManyToOne(() => Organization, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 }

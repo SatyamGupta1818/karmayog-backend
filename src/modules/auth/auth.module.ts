@@ -18,13 +18,13 @@ import { Role } from '../rbac/entities/roles.entity';
 // filenames generated: jwt-access.strategy and jwt-refresh.strategy.
 
 // Guards
-import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { ApiKeyGuard } from 'src/common/guards/api-key.guard';
-import { CompositeAuthGuard } from 'src/common/guards/auth.guard';
-import { RolesGuard } from 'src/common/guards/roles.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { ApiKeyGuard } from '../../common/guards/api-key.guard';
+import { CompositeAuthGuard } from '../../common/guards/auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import { JwtAccessStrategy } from './strategies/access-tokern.strategy';
 import { JwtRefreshStrategy } from './strategies/refresh-token.strategy';
-import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
+import { JwtRefreshGuard } from '../../common/guards/jwt-refresh.guard';
 
 @Module({
   imports: [

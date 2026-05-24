@@ -27,12 +27,16 @@ export class UsersService {
     private readonly redisService: RedisService,
   ) {}
 
-  async createUser(dto: CreateUserDto) {
+  async createUser(dto: CreateUserDto, orgId?: string) {
     this.logger.log('Fetching the User Information');
     const existingUser = await this.userRepo.findOne({ where: { email: dto.email } });
     if (existingUser) {
       this.logger.warn('Email Already Exists');
       throw new ConflictException('Email Already Exists');
+    }
+
+    if (!orgId) {
+      throw new BadRequestException('Organization is required to create a user');
     }
 
     const user = this.userRepo.create({
@@ -41,6 +45,7 @@ export class UsersService {
       email: dto.email,
       password: dto.password,
       isActive: dto.isActive !== undefined ? dto.isActive : true,
+      organization: { id: orgId },
     });
 
     if (dto.roleId) {
@@ -50,13 +55,25 @@ export class UsersService {
     }
 
     if (dto.departmentId) {
-      const department = await this.departmentRepo.findOne({ where: { id: dto.departmentId } });
+      const department = await this.departmentRepo.findOne({
+        where: {
+          id: dto.departmentId,
+          isDeleted: false,
+          organization: { id: orgId },
+        },
+      });
       if (!department) throw new NotFoundException(`Department with ID ${dto.departmentId} not found`);
       user.department = department;
     }
 
     if (dto.teamIds && dto.teamIds.length > 0) {
-      const teams = await this.teamRepo.findBy({ id: In(dto.teamIds) });
+      const teams = await this.teamRepo.find({
+        where: {
+          id: In(dto.teamIds),
+          isDeleted: false,
+          organization: { id: orgId },
+        },
+      });
       if (teams.length !== dto.teamIds.length) {
         throw new BadRequestException('One or more teams could not be found');
       }
@@ -77,8 +94,8 @@ export class UsersService {
     return savedUser.toSafeObject();
   }
 
-  async findAll(query: UserListQueryDto) {
-    const cacheKey = `${this.LIST_CACHE_PREFIX}${JSON.stringify(query)}`;
+  async findAll(query: UserListQueryDto, orgId?: string) {
+    const cacheKey = `${this.LIST_CACHE_PREFIX}${orgId || 'all'}:${JSON.stringify(query)}`;
     const cachedData = await this.redisService.get(cacheKey);
 
     if (cachedData) {
@@ -90,9 +107,14 @@ export class UsersService {
 
     const qb = this.userRepo.createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('user.organization', 'organization')
       .leftJoinAndSelect('user.department', 'department')
       .leftJoinAndSelect('user.teams', 'teams')
       .where('user.isActive != false'); // Assuming you want active users by default or we can just filter by isActive explicitly
+
+    if (orgId) {
+      qb.andWhere('user.organization_id = :orgId', { orgId });
+    }
 
     if (isActive !== undefined) {
       qb.andWhere('user.isActive = :isActive', { isActive });
@@ -132,17 +154,22 @@ export class UsersService {
     return result;
   }
 
-  async findOne(id: string) {
-    const cacheKey = `${this.CACHE_PREFIX}${id}`;
+  async findOne(id: string, orgId?: string) {
+    const cacheKey = this.getCacheKey(id, orgId);
     const cachedData = await this.redisService.get(cacheKey);
 
     if (cachedData) {
       return cachedData;
     }
 
+    const whereClause: any = { id };
+    if (orgId) {
+      whereClause.organization = { id: orgId };
+    }
+
     const user = await this.userRepo.findOne({
-      where: { id },
-      relations: ['role', 'department', 'teams']
+      where: whereClause,
+      relations: ['role', 'organization', 'department', 'teams']
     });
 
     if (!user) {
@@ -154,12 +181,22 @@ export class UsersService {
     return safeUser;
   }
 
-  async update(id: string, updateDto: UpdateUserDto) {
-    const user = await this.userRepo.findOne({ where: { id }, relations: ['teams'] });
+  async update(id: string, updateDto: UpdateUserDto, orgId?: string) {
+    const whereClause: any = { id };
+    if (orgId) {
+      whereClause.organization = { id: orgId };
+    }
+
+    const user = await this.userRepo.findOne({
+      where: whereClause,
+      relations: ['teams', 'organization', 'department'],
+    });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+
+    const effectiveOrgId = orgId || user.organization?.id;
 
     if (updateDto.email && updateDto.email !== user.email) {
       const existingUser = await this.userRepo.findOne({ where: { email: updateDto.email } });
@@ -179,7 +216,12 @@ export class UsersService {
     }
 
     if (updateDto.departmentId) {
-      const department = await this.departmentRepo.findOne({ where: { id: updateDto.departmentId } });
+      const departmentWhere: any = { id: updateDto.departmentId, isDeleted: false };
+      if (effectiveOrgId) {
+        departmentWhere.organization = { id: effectiveOrgId };
+      }
+
+      const department = await this.departmentRepo.findOne({ where: departmentWhere });
       if (!department) throw new NotFoundException(`Department with ID ${updateDto.departmentId} not found`);
       user.department = department;
     } else if (updateDto.departmentId === null) {
@@ -188,9 +230,21 @@ export class UsersService {
 
     if (updateDto.teamIds !== undefined) {
       if (updateDto.teamIds.length > 0) {
-        const teams = await this.teamRepo.findBy({ id: In(updateDto.teamIds) });
+        const teamWhere: any = { id: In(updateDto.teamIds), isDeleted: false };
+        if (effectiveOrgId) {
+          teamWhere.organization = { id: effectiveOrgId };
+        }
+
+        const teams = await this.teamRepo.find({ where: teamWhere });
         if (teams.length !== updateDto.teamIds.length) {
           throw new BadRequestException('One or more teams could not be found');
+        }
+        const targetDepartmentId = updateDto.departmentId || user.department?.id;
+        if (targetDepartmentId) {
+          const invalidTeams = teams.filter(t => t.departmentId !== targetDepartmentId);
+          if (invalidTeams.length > 0) {
+            throw new BadRequestException('Some teams do not belong to the selected department');
+          }
         }
         user.teams = teams;
       } else {
@@ -203,8 +257,13 @@ export class UsersService {
     return updatedUser.toSafeObject();
   }
 
-  async remove(id: string) {
-    const user = await this.userRepo.findOne({ where: { id } });
+  async remove(id: string, orgId?: string) {
+    const whereClause: any = { id };
+    if (orgId) {
+      whereClause.organization = { id: orgId };
+    }
+
+    const user = await this.userRepo.findOne({ where: whereClause });
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
     user.isActive = false; // Soft delete
@@ -214,10 +273,15 @@ export class UsersService {
 
   private async clearCache(id: string) {
     await this.redisService.del(`${this.CACHE_PREFIX}${id}`);
+    await this.redisService.delByPattern(`${this.CACHE_PREFIX}*:${id}`);
     await this.clearListCache();
   }
 
   private async clearListCache() {
     await this.redisService.delByPattern(`${this.LIST_CACHE_PREFIX}*`);
+  }
+
+  private getCacheKey(id: string, orgId?: string) {
+    return `${this.CACHE_PREFIX}${orgId || 'all'}:${id}`;
   }
 }

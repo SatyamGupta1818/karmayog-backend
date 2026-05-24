@@ -2,6 +2,7 @@ export interface JwtPayload {
     sub: string;
     email: string;
     roles: string[];
+    orgId?: string;
     iat?: number;
     exp?: number;
 }
@@ -19,4 +20,5 @@ export interface AuthenticatedUser {
     userId: string;
     email: string;
     roles: string[];
+    orgId?: string;
 }

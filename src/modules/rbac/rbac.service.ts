@@ -23,7 +23,7 @@ import { ModulePermission } from './entities/module-permission.rbac';
 import { RolePermission } from './entities/role-permission.rbac';
 import { Role } from './entities/roles.entity';
 import { User } from '../users/entities/user.entity';
-import { RedisService } from 'src/shared/cache/redis/redis.service';
+import { RedisService } from '../../shared/cache/redis/redis.service';
 import { IsUUID } from 'class-validator';
 
 @Injectable()
