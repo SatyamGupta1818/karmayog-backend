@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Organization } from '../../organization/entities/organization.entity';
 import { Role } from 'src/modules/rbac/entities/roles.entity';
+import { Department } from '../../departments/entities/department.entity';
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn('uuid')
@@ -68,6 +69,13 @@ export class User {
     })
     @JoinColumn({ name: 'organization_id' })
     organization: Organization;
+
+    @ManyToOne(() => Department, (department) => department.users, {
+        nullable: true,
+        onDelete: 'SET NULL',
+    })
+    @JoinColumn({ name: 'department_id' })
+    department: Department;
 
 
     get fullName(): string {

@@ -1,0 +1,209 @@
+{
+  "info": {
+    "name": "Karmayog - Departments & Teams",
+    "description": "Postman Collection for Departments and Teams modules.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "departmentId",
+      "value": "ENTER_DEPARTMENT_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "teamId",
+      "value": "ENTER_TEAM_ID_HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Departments",
+      "item": [
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Engineering\",\n    \"description\": \"Engineering Department\",\n    \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/department/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["department", "create"]
+            }
+          }
+        },
+        {
+          "name": "Get Department List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/department/list?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["department", "list"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "eng", "disabled": true },
+                { "key": "isActive", "value": "true", "disabled": true },
+                { "key": "sortBy", "value": "createdAt", "disabled": true },
+                { "key": "sortOrder", "value": "DESC", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Department By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/department/{{departmentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["department", "{{departmentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Department",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Engineering Updated\",\n    \"description\": \"Updated Description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/department/update/{{departmentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["department", "update", "{{departmentId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Department",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/department/delete/{{departmentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["department", "delete", "{{departmentId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "Create Team",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"departmentId\": \"{{departmentId}}\",\n    \"name\": \"Frontend Team\",\n    \"description\": \"Frontend Development Team\",\n    \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["teams", "create"]
+            }
+          }
+        },
+        {
+          "name": "Get Teams List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/list?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["teams", "list"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "search", "value": "front", "disabled": true },
+                { "key": "departmentId", "value": "{{departmentId}}", "disabled": true },
+                { "key": "isActive", "value": "true", "disabled": true },
+                { "key": "sortBy", "value": "createdAt", "disabled": true },
+                { "key": "sortOrder", "value": "DESC", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Team By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/{{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["teams", "{{teamId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Team",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Frontend Team Updated\",\n    \"description\": \"Updated Description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teams/update/{{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["teams", "update", "{{teamId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Team",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/teams/delete/{{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["teams", "delete", "{{teamId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
