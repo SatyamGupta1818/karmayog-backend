@@ -251,7 +251,7 @@ export class AuthService {
 
     // ── Transactional create ──────────────────────────────────────────────────
     return this.dataSource.transaction(async (manager) => {
-      const ownerRole = await manager.findOneBy(Role, { name: UserRole.OWNER });
+      const ownerRole = await manager.findOneBy(Role, { name: UserRole.ADMIN });
 
       if (!ownerRole) {
         throw new NotFoundException(
