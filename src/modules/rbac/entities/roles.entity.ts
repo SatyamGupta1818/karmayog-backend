@@ -13,7 +13,6 @@ import { User } from '../../users/entities/user.entity';
 export enum UserRole {
     SUPER_ADMIN = 'SUPER_ADMIN',
     ADMIN = 'ADMIN',
-    OWNER = 'OWNER',
     MANAGER = 'MANAGER',
     MODERATOR = 'MODERATOR',
     TEAM_LEADER = 'TEAM_LEADER',
