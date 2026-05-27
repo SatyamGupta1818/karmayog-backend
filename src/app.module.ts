@@ -20,6 +20,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all-execptions.filters';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RbacModule } from './modules/rbac/rbac.module';
+import { DepartmentsModule } from './modules/departments/departments.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { RbacModule } from './modules/rbac/rbac.module';
     UsersModule,
     OrganizationModule,
     RbacModule,
+    DepartmentsModule,
   ],
   controllers: [AppController],
   providers: [

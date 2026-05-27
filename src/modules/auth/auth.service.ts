@@ -70,7 +70,7 @@ export class AuthService {
   ) {
     this.accessSecret = this.configService.getOrThrow<string>('JWT_ACCESS_SECRET');
     this.refreshSecret = this.configService.getOrThrow<string>('JWT_REFRESH_SECRET');
-    this.accessExpiresIn = this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m');
+    this.accessExpiresIn = this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '120m');
     this.refreshExpiresIn = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d');
   }
 
@@ -138,6 +138,7 @@ export class AuthService {
     const user = await this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('user.organization', 'organization')
       .where('user.email = :email', { email })
       .getOne();
 
@@ -206,7 +207,7 @@ export class AuthService {
 
     // ── Issue tokens ──────────────────────────────────────────────────────────
     const roles: string[] = user.role ? [user.role.name] : [];
-    const tokens = await this.generateTokens(user.id, user.email, roles);
+    const tokens = await this.generateTokens(user.id, user.email, roles, user.organization?.id);
     await this.storeRefreshToken(user.id, tokens.refreshToken);
 
     this.logger.log(`User ${email} logged in successfully`);
@@ -297,6 +298,7 @@ export class AuthService {
   async refreshTokens(userId: string, email: string, roles: string[], incomingRefreshToken: string): Promise<TokensResponseDto> {
     const user = await this.userRepository
       .createQueryBuilder('user')
+      .leftJoinAndSelect('user.organization', 'organization')
       .addSelect('user.hashedRefreshToken')
       .where('user.id = :id AND user.isActive = :isActive', {
         id: userId,
@@ -319,10 +321,47 @@ export class AuthService {
       );
     }
 
-    const tokens = await this.generateTokens(userId, email, roles);
+    const tokens = await this.generateTokens(userId, email, roles, user.organization?.id);
     await this.storeRefreshToken(userId, tokens.refreshToken);
 
     this.logger.log(`Tokens refreshed for user: ${userId}`);
+    return tokens;
+  }
+
+  async switchOrganization(userId: string, roles: string[], orgId: string): Promise<TokensResponseDto> {
+    if (!roles.includes(UserRole.SUPER_ADMIN)) {
+      throw new ForbiddenException('Only SUPER_ADMIN can switch organizations');
+    }
+
+    const [user, organization] = await Promise.all([
+      this.userRepository.findOne({
+        where: { id: userId, isActive: true },
+        relations: ['role', 'organization'],
+      }),
+      this.orgRepository.findOne({
+        where: { id: orgId, isActive: true, isDeleted: false },
+      }),
+    ]);
+
+    if (!user) {
+      throw new NotFoundException('User not found or inactive');
+    }
+    if (!organization) {
+      throw new NotFoundException('Organization not found or inactive');
+    }
+
+    if (user.role?.name !== UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Only SUPER_ADMIN can switch organizations');
+    }
+
+    user.organization = organization;
+    await this.userRepository.save(user);
+
+    const effectiveRoles: string[] = user.role ? [user.role.name] : roles;
+    const tokens = await this.generateTokens(user.id, user.email, effectiveRoles, organization.id);
+    await this.storeRefreshToken(user.id, tokens.refreshToken);
+
+    this.logger.log(`SUPER_ADMIN ${user.email} switched active organization to ${organization.id}`);
     return tokens;
   }
 
@@ -416,8 +455,8 @@ export class AuthService {
   // PRIVATE HELPERS
   // ──────────────────────────────────────────────────────────────────────────
 
-  private async generateTokens(userId: string, email: string, roles: string[],): Promise<Tokens> {
-    const payload: JwtPayload = { sub: userId, email, roles };
+  private async generateTokens(userId: string, email: string, roles: string[], orgId?: string): Promise<Tokens> {
+    const payload: JwtPayload = { sub: userId, email, roles, orgId };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {

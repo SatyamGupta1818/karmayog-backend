@@ -8,7 +8,7 @@ describe('RbacController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [RbacController],
-      providers: [RbacService],
+      providers: [{ provide: RbacService, useValue: {} }],
     }).compile();
 
     controller = module.get<RbacController>(RbacController);

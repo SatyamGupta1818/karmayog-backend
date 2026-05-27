@@ -7,9 +7,13 @@ import {
     Index,
     ManyToOne,
     JoinColumn,
+    ManyToMany,
+    JoinTable,
 } from 'typeorm';
 import { Organization } from '../../organization/entities/organization.entity';
-import { Role } from 'src/modules/rbac/entities/roles.entity';
+import { Role } from '../../rbac/entities/roles.entity';
+import { Department } from '../../departments/entities/department.entity';
+import { Team } from '../../departments/entities/team.entity';
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn('uuid')
@@ -68,6 +72,21 @@ export class User {
     })
     @JoinColumn({ name: 'organization_id' })
     organization: Organization;
+
+    @ManyToOne(() => Department, (department) => department.users, {
+        nullable: true,
+        onDelete: 'SET NULL',
+    })
+    @JoinColumn({ name: 'department_id' })
+    department: Department;
+
+    @ManyToMany(() => Team, { onDelete: 'CASCADE' })
+    @JoinTable({
+        name: 'user_teams',
+        joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'team_id', referencedColumnName: 'id' },
+    })
+    teams: Team[];
 
 
     get fullName(): string {
