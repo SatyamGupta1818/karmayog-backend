@@ -12,8 +12,13 @@ export class ApiKeyGuard implements CanActivate {
     constructor(private readonly configService: ConfigService) { }
 
     canActivate(context: ExecutionContext): boolean {
-        const request = context.switchToHttp().getRequest();
-        const apiKey = request.headers['x-api-key'];
+        // Explicitly type headers to avoid 'any' propagation
+        const request = context.switchToHttp().getRequest<{
+            headers: Record<string, string | string[] | undefined>;
+        }>();
+        
+        const apiKeyHeader = request.headers['x-api-key'];
+        const apiKey = Array.isArray(apiKeyHeader) ? apiKeyHeader[0] : apiKeyHeader;
 
         // No key sent at all
         if (!apiKey) {

@@ -50,9 +50,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
                 error = res.error ?? exception.name;
             }
         } else if (exception instanceof QueryFailedError) {
-            // Intersect standard QueryFailedError with an optional postgres-specific code field
-            const pgError = exception as QueryFailedError & { code?: string };
-            if (pgError.code === '23505') {
+            // TypeORM's QueryFailedError stores the original driver error in 'driverError'
+            const driverError = exception.driverError as { code?: string } | undefined;
+            if (driverError?.code === '23505') {
                 status = HttpStatus.CONFLICT;
                 message = 'A record with this data already exists';
                 error = 'Conflict';

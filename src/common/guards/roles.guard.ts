@@ -7,9 +7,13 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
+interface UserPayload {
+    roles?: string[];
+}
+
 @Injectable()
 export class RolesGuard implements CanActivate {
-    constructor(private reflector: Reflector) { }
+    constructor(private readonly reflector: Reflector) { }
 
     canActivate(context: ExecutionContext): boolean {
         const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
@@ -20,7 +24,9 @@ export class RolesGuard implements CanActivate {
         // No roles required — allow access
         if (!requiredRoles || requiredRoles.length === 0) return true;
 
-        const { user } = context.switchToHttp().getRequest();
+        // Explicitly type the request context to access 'user' safely
+        const request = context.switchToHttp().getRequest<{ user?: UserPayload }>();
+        const user = request.user;
 
         const hasRole = requiredRoles.some((role) => user?.roles?.includes(role));
 
