@@ -47,4 +47,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/your-app-name:latest
+          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/karmayog-backend:latest
