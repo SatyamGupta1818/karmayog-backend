@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# Global environment variables
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true" # Opt-in to Node 24 to silence Node 20 deprecation warnings
+
 jobs:
   ci:
     name: Lint → Test → Build → Docker
@@ -30,6 +34,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Step to programmatically lowercase the username for the Docker tag
+      - name: Lowercase GHCR username
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "GHCR_USERNAME_LC=$(echo "${{ secrets.GHCR_USERNAME }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Log in to GHCR
         if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
@@ -44,4 +54,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/karmayog-backend:latest
+          # References the lowercase environment variable created in the step above
+          tags: ghcr.io/${{ env.GHCR_USERNAME_LC }}/karmayog-backend:latest
