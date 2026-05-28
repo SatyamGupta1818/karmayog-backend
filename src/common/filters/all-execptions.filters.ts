@@ -18,6 +18,12 @@ interface ErrorResponse {
     requestId?: string;
 }
 
+// Explicit interface for NestJS HttpException responses to avoid using 'any'
+interface NestHttpExceptionResponse {
+    message?: string | string[];
+    error?: string;
+}
+
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
     private readonly logger = new Logger(AllExceptionsFilter.name);
@@ -37,13 +43,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
             if (typeof exceptionResponse === 'string') {
                 message = exceptionResponse;
-            } else if (typeof exceptionResponse === 'object') {
-                const res = exceptionResponse as any;
+            } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+                // Cast to our interface instead of 'any'
+                const res = exceptionResponse as NestHttpExceptionResponse;
                 message = res.message ?? message;
                 error = res.error ?? exception.name;
             }
         } else if (exception instanceof QueryFailedError) {
-            const pgError = exception as any;
+            // Intersect standard QueryFailedError with an optional postgres-specific code field
+            const pgError = exception as QueryFailedError & { code?: string };
             if (pgError.code === '23505') {
                 status = HttpStatus.CONFLICT;
                 message = 'A record with this data already exists';
@@ -53,13 +61,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
             message = exception.message;
         }
 
+        // Format message for logging to prevent template expression restrictions on arrays
+        const logMessage = Array.isArray(message) ? message.join(', ') : message;
+
         if (status >= 500) {
             this.logger.error(
                 `${request.method} ${request.url} → ${status}`,
                 exception instanceof Error ? exception.stack : String(exception),
             );
         } else {
-            this.logger.warn(`${request.method} ${request.url} → ${status}: ${message}`);
+            this.logger.warn(`${request.method} ${request.url} → ${status}: ${logMessage}`);
         }
 
         const body: ErrorResponse = {
