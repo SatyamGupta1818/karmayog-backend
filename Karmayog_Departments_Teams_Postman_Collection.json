@@ -51,8 +51,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/department/create",
-              "host": ["{{baseUrl}}"],
-              "path": ["department", "create"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "department",
+                "create"
+              ]
             }
           }
         },
@@ -63,15 +68,42 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/department/list?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["department", "list"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "department",
+                "list"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" },
-                { "key": "search", "value": "eng", "disabled": true },
-                { "key": "isActive", "value": "true", "disabled": true },
-                { "key": "sortBy", "value": "createdAt", "disabled": true },
-                { "key": "sortOrder", "value": "DESC", "disabled": true }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "eng",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "DESC",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -83,8 +115,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/department/{{departmentId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["department", "{{departmentId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "department",
+                "{{departmentId}}"
+              ]
             }
           }
         },
@@ -104,8 +141,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/department/update/{{departmentId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["department", "update", "{{departmentId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "department",
+                "update",
+                "{{departmentId}}"
+              ]
             }
           }
         },
@@ -116,8 +159,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/department/delete/{{departmentId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["department", "delete", "{{departmentId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "department",
+                "delete",
+                "{{departmentId}}"
+              ]
             }
           }
         }
@@ -142,8 +191,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/teams/create",
-              "host": ["{{baseUrl}}"],
-              "path": ["teams", "create"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "create"
+              ]
             }
           }
         },
@@ -154,16 +208,47 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/teams/list?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["teams", "list"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "list"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" },
-                { "key": "search", "value": "front", "disabled": true },
-                { "key": "departmentId", "value": "{{departmentId}}", "disabled": true },
-                { "key": "isActive", "value": "true", "disabled": true },
-                { "key": "sortBy", "value": "createdAt", "disabled": true },
-                { "key": "sortOrder", "value": "DESC", "disabled": true }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "front",
+                  "disabled": true
+                },
+                {
+                  "key": "departmentId",
+                  "value": "{{departmentId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "DESC",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -175,8 +260,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/teams/{{teamId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["teams", "{{teamId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "{{teamId}}"
+              ]
             }
           }
         },
@@ -196,8 +286,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/teams/update/{{teamId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["teams", "update", "{{teamId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "update",
+                "{{teamId}}"
+              ]
             }
           }
         },
@@ -208,8 +304,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/teams/delete/{{teamId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["teams", "delete", "{{teamId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "teams",
+                "delete",
+                "{{teamId}}"
+              ]
             }
           }
         }
@@ -234,8 +336,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/user/create",
-              "host": ["{{baseUrl}}"],
-              "path": ["user", "create"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "create"
+              ]
             }
           }
         },
@@ -246,18 +353,57 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/user/list?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["user", "list"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "list"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "10" },
-                { "key": "search", "value": "satyam", "disabled": true },
-                { "key": "departmentId", "value": "{{departmentId}}", "disabled": true },
-                { "key": "teamId", "value": "{{teamId}}", "disabled": true },
-                { "key": "roleId", "value": "{{roleId}}", "disabled": true },
-                { "key": "isActive", "value": "true", "disabled": true },
-                { "key": "sortBy", "value": "createdAt", "disabled": true },
-                { "key": "sortOrder", "value": "DESC", "disabled": true }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "satyam",
+                  "disabled": true
+                },
+                {
+                  "key": "departmentId",
+                  "value": "{{departmentId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "teamId",
+                  "value": "{{teamId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "roleId",
+                  "value": "{{roleId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "DESC",
+                  "disabled": true
+                }
               ]
             }
           }
@@ -269,8 +415,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/user/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["user", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "{{userId}}"
+              ]
             }
           }
         },
@@ -290,8 +441,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/user/update/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["user", "update", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "update",
+                "{{userId}}"
+              ]
             }
           }
         },
@@ -302,8 +459,192 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/user/delete/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["user", "delete", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "delete",
+                "{{userId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New SaaS Project\",\n  \"description\": \"Building a new scalable platform\",\n  \"status\": \"PLANNING\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects/create",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects/list?page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Project",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "project-uuid-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACTIVE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects/update/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "update",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "project-uuid-here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/projects/delete/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "delete",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "project-uuid-here"
+                }
+              ]
             }
           }
         }

@@ -21,6 +21,7 @@ import { AllExceptionsFilter } from './common/filters/all-execptions.filters';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
+import { ProjectsModule } from './modules/projects/projects.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { DepartmentsModule } from './modules/departments/departments.module';
     OrganizationModule,
     RbacModule,
     DepartmentsModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [
