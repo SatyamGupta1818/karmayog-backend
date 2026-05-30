@@ -7,8 +7,10 @@ import {
   DeleteDateColumn,
   Index,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import type { User } from '../../users/entities/user.entity';
 
 export enum SubscriptionType {
   FREE = 'FREE',
@@ -96,6 +98,13 @@ export class Organization {
   updatedAt: Date;
 
   // ✅ Added relationship to User
-  @OneToMany(() => User, (user) => user.organization)
+  @OneToMany('User', (user: User) => user.organization)
   users: User[];
+
+  @Column({ name: 'organization_owner_id', type: 'uuid', nullable: true })
+  organizationOwnerId?: string;
+
+  @ManyToOne('User')
+  @JoinColumn({ name: 'organization_owner_id' })
+  owner?: User;
 }

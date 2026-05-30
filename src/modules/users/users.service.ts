@@ -5,7 +5,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto, UserListQueryDto } from './dto/users.dto';
 import { Department } from '../departments/entities/department.entity';
 import { Team } from '../departments/entities/team.entity';
-import { Role } from '../rbac/entities/roles.entity';
+import { Role, UserRole } from '../rbac/entities/roles.entity';
 import { RedisService } from '../../shared/cache/redis/redis.service';
 
 @Injectable()
@@ -110,7 +110,8 @@ export class UsersService {
       .leftJoinAndSelect('user.organization', 'organization')
       .leftJoinAndSelect('user.department', 'department')
       .leftJoinAndSelect('user.teams', 'teams')
-      .where('user.isActive != false'); // Assuming you want active users by default or we can just filter by isActive explicitly
+      .where('user.isActive != false') // Assuming you want active users by default or we can just filter by isActive explicitly
+      .andWhere('role.name != :superAdminRole', { superAdminRole: UserRole.SUPER_ADMIN });
 
     if (orgId) {
       qb.andWhere('user.organization_id = :orgId', { orgId });

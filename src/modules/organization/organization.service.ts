@@ -15,15 +15,15 @@ import { Organization } from './entities/organization.entity';
 import { RedisService } from '../../shared/cache/redis/redis.service';
 
 const ORGANIZATION_SORT_COLUMNS = {
-  organizationName: 'organization.organization_name',
-  organizationType: 'organization.organization_type',
-  organizationSize: 'organization.organization_size',
-  orgEmail: 'organization.org_email',
-  subscriptionType: 'organization.subscription_type',
-  isSubscriptionTaken: 'organization.is_subscription_taken',
-  isActive: 'organization.is_active',
-  createdAt: 'organization.created_at',
-  updatedAt: 'organization.updated_at',
+  organizationName: 'organization.organizationName',
+  organizationType: 'organization.organizationType',
+  organizationSize: 'organization.organizationSize',
+  orgEmail: 'organization.orgEmail',
+  subscriptionType: 'organization.subscriptionType',
+  isSubscriptionTaken: 'organization.isSubscriptionTaken',
+  isActive: 'organization.isActive',
+  createdAt: 'organization.createdAt',
+  updatedAt: 'organization.updatedAt',
 } as const;
 
 @Injectable()
@@ -83,6 +83,7 @@ export class OrganizationService {
 
     const qb = this.organizationRepository
       .createQueryBuilder('organization')
+      .leftJoinAndSelect('organization.owner', 'owner')
       .where('organization.is_deleted = :isDeleted', { isDeleted: false });
 
     if (orgId) {
@@ -149,7 +150,7 @@ export class OrganizationService {
 
     const organization = await this.organizationRepository.findOne({
       where: { id, isDeleted: false },
-      relations: ['users'],
+      relations: ['users', 'owner'],
     });
 
     if (!organization) {

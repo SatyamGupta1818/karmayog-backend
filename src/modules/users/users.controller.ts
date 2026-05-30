@@ -27,7 +27,7 @@ export class UsersController {
     @Body() createUserDto: CreateUserDto,
     @GetCurrentUser() user: AuthenticatedUser,
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? createUserDto.orgId : user.orgId;
+    const orgId = user.roles.includes('SUPER_ADMIN') ? (user.orgId || createUserDto.orgId) : user.orgId;
     return this.usersService.createUser(createUserDto, orgId);
   }
 
@@ -47,7 +47,7 @@ export class UsersController {
     @Param('id') id: string,
     @GetCurrentUser() user: AuthenticatedUser,
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? undefined : user.orgId;
+    const orgId = user.orgId;
     return this.usersService.findOne(id, orgId);
   }
 
@@ -58,7 +58,7 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @GetCurrentUser() user: AuthenticatedUser,
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? undefined : user.orgId;
+    const orgId = user.orgId;
     return this.usersService.update(id, updateUserDto, orgId);
   }
 
@@ -68,7 +68,7 @@ export class UsersController {
     @Param('id') id: string,
     @GetCurrentUser() user: AuthenticatedUser,
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? undefined : user.orgId;
+    const orgId = user.orgId;
     return this.usersService.remove(id, orgId);
   }
 }

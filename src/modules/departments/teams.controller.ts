@@ -13,7 +13,7 @@ export class TeamsController {
     @Body() createTeamDto: CreateTeamDto,
     @GetCurrentUser() user: AuthenticatedUser
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? createTeamDto.orgId : user.orgId;
+    const orgId = user.roles.includes('SUPER_ADMIN') ? (user.orgId || createTeamDto.orgId) : user.orgId;
     return this.teamsService.create(createTeamDto, orgId);
   }
 
@@ -22,7 +22,7 @@ export class TeamsController {
     @Query() query: TeamListQueryDto,
     @GetCurrentUser() user: AuthenticatedUser
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? query.orgId : user.orgId;
+    const orgId = user.orgId;
     return this.teamsService.findAll(query, orgId);
   }
 
@@ -31,7 +31,7 @@ export class TeamsController {
     @Param('id') id: string,
     @GetCurrentUser() user: AuthenticatedUser
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? undefined : user.orgId;
+    const orgId = user.orgId;
     return this.teamsService.findOne(id, orgId);
   }
 
@@ -41,7 +41,7 @@ export class TeamsController {
     @Body() updateTeamDto: UpdateTeamDto,
     @GetCurrentUser() user: AuthenticatedUser
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? undefined : user.orgId;
+    const orgId = user.orgId;
     return this.teamsService.update(id, updateTeamDto, orgId);
   }
 
@@ -50,7 +50,7 @@ export class TeamsController {
     @Param('id') id: string,
     @GetCurrentUser() user: AuthenticatedUser
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? undefined : user.orgId;
+    const orgId = user.orgId;
     return this.teamsService.remove(id, orgId);
   }
 }

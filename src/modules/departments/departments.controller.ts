@@ -13,7 +13,7 @@ export class DepartmentsController {
     @Body() createDepartmentDto: CreateDepartmentDto,
     @GetCurrentUser() user: AuthenticatedUser
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? createDepartmentDto.orgId : user.orgId;
+    const orgId = user.roles.includes('SUPER_ADMIN') ? (user.orgId || createDepartmentDto.orgId) : user.orgId;
     return this.departmentsService.create(createDepartmentDto, orgId);
   }
 
@@ -31,7 +31,7 @@ export class DepartmentsController {
     @Param('id') id: string,
     @GetCurrentUser() user: AuthenticatedUser
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? undefined : user.orgId;
+    const orgId = user.orgId;
     return this.departmentsService.findOne(id, orgId);
   }
 
@@ -41,7 +41,7 @@ export class DepartmentsController {
     @Body() updateDepartmentDto: UpdateDepartmentDto,
     @GetCurrentUser() user: AuthenticatedUser
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? undefined : user.orgId;
+    const orgId = user.orgId;
     return this.departmentsService.update(id, updateDepartmentDto, orgId);
   }
 
@@ -50,7 +50,7 @@ export class DepartmentsController {
     @Param('id') id: string,
     @GetCurrentUser() user: AuthenticatedUser
   ) {
-    const orgId = user.roles.includes('SUPER_ADMIN') ? undefined : user.orgId;
+    const orgId = user.orgId;
     return this.departmentsService.remove(id, orgId);
   }
 }

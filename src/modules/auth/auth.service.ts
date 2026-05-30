@@ -278,7 +278,14 @@ export class AuthService {
       });
       const savedUser = await manager.save(user);
 
+      // Link owner to organization
+      savedOrg.organizationOwnerId = savedUser.id;
+      await manager.save(Organization, savedOrg);
+
       this.logger.log(`Organization "${organizationName}" registered by ${workEmail}`);
+
+      // Invalidate organization list cache so the new org (and owner) shows up
+      await this.redisService.delByPattern('organizations:list:*');
 
       return {
         message: 'Organization registered successfully. Use your work email to log in.',
