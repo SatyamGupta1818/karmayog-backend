@@ -1,0 +1,1629 @@
+{
+  "info": {
+    "name": "Karmayog - Workspace Project Execution",
+    "description": "Postman Collection for Projects, Features, Tasks, SubTasks, Issues/Bugs, Comments, and Work Logs modules. Uses {{baseUrl}} for the API root and {{authToken}} for bearer authentication.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "ENTER_JWT_ACCESS_TOKEN_HERE",
+      "type": "string"
+    },
+    {
+      "key": "orgId",
+      "value": "ENTER_ORGANIZATION_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "projectId",
+      "value": "ENTER_PROJECT_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "departmentId",
+      "value": "ENTER_DEPARTMENT_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "teamId",
+      "value": "ENTER_TEAM_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "memberId",
+      "value": "ENTER_MEMBER_USER_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "ownerId",
+      "value": "ENTER_FEATURE_OWNER_USER_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "assignedToId",
+      "value": "ENTER_ASSIGNEE_USER_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "ENTER_WORK_LOG_USER_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "featureId",
+      "value": "ENTER_FEATURE_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "taskId",
+      "value": "ENTER_TASK_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "subTaskId",
+      "value": "ENTER_SUBTASK_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "issueId",
+      "value": "ENTER_ISSUE_OR_BUG_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "commentId",
+      "value": "ENTER_COMMENT_ID_HERE",
+      "type": "string"
+    },
+    {
+      "key": "workLogId",
+      "value": "ENTER_WORK_LOG_ID_HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) pm.collectionVariables.set('projectId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Karmayog Mobile App Launch\",\n  \"description\": \"Launch planning and execution for the first mobile app release.\",\n  \"status\": \"PLANNING\",\n  \"startDate\": \"2026-06-01T00:00:00.000Z\",\n  \"endDate\": \"2026-07-15T00:00:00.000Z\",\n  \"budgetMinutes\": 12000,\n  \"departmentId\": \"{{departmentId}}\",\n  \"teamIds\": [\n    \"{{teamId}}\"\n  ],\n  \"memberIds\": [\n    \"{{memberId}}\"\n  ],\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/projects/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "projects",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Project List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/projects/list?page=1&limit=10&status=PLANNING&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "projects",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "mobile",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "PLANNING"
+                },
+                {
+                  "key": "departmentId",
+                  "value": "{{departmentId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "teamId",
+                  "value": "{{teamId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "memberId",
+                  "value": "{{memberId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "DESC",
+                  "disabled": true
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Project By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "projects",
+                "{{projectId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Karmayog Mobile App Launch - Phase 1\",\n  \"description\": \"Updated launch plan for MVP release.\",\n  \"status\": \"ACTIVE\",\n  \"startDate\": \"2026-06-01T00:00:00.000Z\",\n  \"endDate\": \"2026-07-31T00:00:00.000Z\",\n  \"budgetMinutes\": 15000,\n  \"departmentId\": \"{{departmentId}}\",\n  \"teamIds\": [\n    \"{{teamId}}\"\n  ],\n  \"memberIds\": [\n    \"{{memberId}}\"\n  ],\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/projects/update/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "projects",
+                "update",
+                "{{projectId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/projects/delete/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "projects",
+                "delete",
+                "{{projectId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Features",
+      "item": [
+        {
+          "name": "Create Feature",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) pm.collectionVariables.set('featureId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Client Onboarding Flow\",\n  \"description\": \"Screens and backend work needed for onboarding new client organizations.\",\n  \"status\": \"PLANNED\",\n  \"priority\": \"HIGH\",\n  \"projectId\": \"{{projectId}}\",\n  \"ownerId\": \"{{ownerId}}\",\n  \"startDate\": \"2026-06-02T00:00:00.000Z\",\n  \"dueDate\": \"2026-06-20T00:00:00.000Z\",\n  \"budgetMinutes\": 2400,\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Feature List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/list?page=1&limit=10&projectId={{projectId}}&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "projectId",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "search",
+                  "value": "onboarding",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "PLANNED",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "HIGH",
+                  "disabled": true
+                },
+                {
+                  "key": "ownerId",
+                  "value": "{{ownerId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "DESC",
+                  "disabled": true
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Feature By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/{{featureId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "{{featureId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Feature",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Client Onboarding Flow\",\n  \"description\": \"Updated onboarding scope with approval and checklist steps.\",\n  \"status\": \"IN_PROGRESS\",\n  \"priority\": \"HIGH\",\n  \"projectId\": \"{{projectId}}\",\n  \"ownerId\": \"{{ownerId}}\",\n  \"startDate\": \"2026-06-02T00:00:00.000Z\",\n  \"dueDate\": \"2026-06-22T00:00:00.000Z\",\n  \"budgetMinutes\": 3000,\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/features/update/{{featureId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "update",
+                "{{featureId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Feature",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/features/delete/{{featureId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "features",
+                "delete",
+                "{{featureId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Create Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) pm.collectionVariables.set('taskId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Create onboarding checklist API\",\n  \"description\": \"Build API endpoints and validation for the client onboarding checklist.\",\n  \"status\": \"TODO\",\n  \"priority\": \"HIGH\",\n  \"featureId\": \"{{featureId}}\",\n  \"assignedToId\": \"{{assignedToId}}\",\n  \"startDate\": \"2026-06-03T00:00:00.000Z\",\n  \"dueDate\": \"2026-06-08T00:00:00.000Z\",\n  \"budgetMinutes\": 480,\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Task List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/list?page=1&limit=10&featureId={{featureId}}&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "projectId",
+                  "value": "{{projectId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "featureId",
+                  "value": "{{featureId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "TODO",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "HIGH",
+                  "disabled": true
+                },
+                {
+                  "key": "assignedToId",
+                  "value": "{{assignedToId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Task By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/{{taskId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                "{{taskId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Create onboarding checklist API\",\n  \"description\": \"Implement create, update, list, and validation behavior.\",\n  \"status\": \"IN_PROGRESS\",\n  \"priority\": \"HIGH\",\n  \"featureId\": \"{{featureId}}\",\n  \"assignedToId\": \"{{assignedToId}}\",\n  \"startDate\": \"2026-06-03T00:00:00.000Z\",\n  \"dueDate\": \"2026-06-09T00:00:00.000Z\",\n  \"budgetMinutes\": 600,\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tasks/update/{{taskId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                "update",
+                "{{taskId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tasks/delete/{{taskId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tasks",
+                "delete",
+                "{{taskId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SubTasks",
+      "item": [
+        {
+          "name": "Create SubTask",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) pm.collectionVariables.set('subTaskId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Validate checklist item payload\",\n  \"description\": \"Add DTO validation and service-level ownership checks.\",\n  \"status\": \"TODO\",\n  \"priority\": \"MEDIUM\",\n  \"taskId\": \"{{taskId}}\",\n  \"assignedToId\": \"{{assignedToId}}\",\n  \"startDate\": \"2026-06-03T00:00:00.000Z\",\n  \"dueDate\": \"2026-06-04T00:00:00.000Z\",\n  \"budgetMinutes\": 120,\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subtasks/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subtasks",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get SubTask List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subtasks/list?page=1&limit=10&taskId={{taskId}}&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subtasks",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "projectId",
+                  "value": "{{projectId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "featureId",
+                  "value": "{{featureId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "taskId",
+                  "value": "{{taskId}}"
+                },
+                {
+                  "key": "status",
+                  "value": "TODO",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "MEDIUM",
+                  "disabled": true
+                },
+                {
+                  "key": "assignedToId",
+                  "value": "{{assignedToId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get SubTask By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subtasks/{{subTaskId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subtasks",
+                "{{subTaskId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update SubTask",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Validate checklist item payload\",\n  \"description\": \"Validation and organization checks completed; ready for review.\",\n  \"status\": \"IN_REVIEW\",\n  \"priority\": \"MEDIUM\",\n  \"taskId\": \"{{taskId}}\",\n  \"assignedToId\": \"{{assignedToId}}\",\n  \"startDate\": \"2026-06-03T00:00:00.000Z\",\n  \"dueDate\": \"2026-06-04T00:00:00.000Z\",\n  \"budgetMinutes\": 150,\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subtasks/update/{{subTaskId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subtasks",
+                "update",
+                "{{subTaskId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete SubTask",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subtasks/delete/{{subTaskId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "subtasks",
+                "delete",
+                "{{subTaskId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Issues and Bugs",
+      "item": [
+        {
+          "name": "Create Issue",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) pm.collectionVariables.set('issueId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Checklist item API returns validation error for valid payload\",\n  \"description\": \"Valid checklist payload is rejected when optional notes field is empty.\",\n  \"type\": \"ISSUE\",\n  \"status\": \"OPEN\",\n  \"priority\": \"HIGH\",\n  \"severity\": \"MAJOR\",\n  \"projectId\": \"{{projectId}}\",\n  \"featureId\": \"{{featureId}}\",\n  \"taskId\": \"{{taskId}}\",\n  \"subTaskId\": \"{{subTaskId}}\",\n  \"assignedToId\": \"{{assignedToId}}\",\n  \"startDate\": \"2026-06-04T00:00:00.000Z\",\n  \"dueDate\": \"2026-06-06T00:00:00.000Z\",\n  \"budgetMinutes\": 180,\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/issues/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "issues",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Bug",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Onboarding checklist save button does not respond\",\n  \"description\": \"Clicking save on the checklist form does not submit the request.\",\n  \"type\": \"BUG\",\n  \"status\": \"OPEN\",\n  \"priority\": \"CRITICAL\",\n  \"severity\": \"BLOCKER\",\n  \"projectId\": \"{{projectId}}\",\n  \"featureId\": \"{{featureId}}\",\n  \"taskId\": \"{{taskId}}\",\n  \"assignedToId\": \"{{assignedToId}}\",\n  \"startDate\": \"2026-06-05T00:00:00.000Z\",\n  \"dueDate\": \"2026-06-05T18:30:00.000Z\",\n  \"budgetMinutes\": 240,\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/issues/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "issues",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Issue/Bug List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/issues/list?page=1&limit=10&projectId={{projectId}}&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "issues",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "projectId",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "featureId",
+                  "value": "{{featureId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "taskId",
+                  "value": "{{taskId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "subTaskId",
+                  "value": "{{subTaskId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "BUG",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "OPEN",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "HIGH",
+                  "disabled": true
+                },
+                {
+                  "key": "severity",
+                  "value": "MAJOR",
+                  "disabled": true
+                },
+                {
+                  "key": "assignedToId",
+                  "value": "{{assignedToId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Issue/Bug By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/issues/{{issueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "issues",
+                "{{issueId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Issue/Bug",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Checklist item API returns validation error for valid payload\",\n  \"description\": \"Validation error reproduced and fix is in progress.\",\n  \"type\": \"ISSUE\",\n  \"status\": \"IN_PROGRESS\",\n  \"priority\": \"HIGH\",\n  \"severity\": \"MAJOR\",\n  \"projectId\": \"{{projectId}}\",\n  \"featureId\": \"{{featureId}}\",\n  \"taskId\": \"{{taskId}}\",\n  \"subTaskId\": \"{{subTaskId}}\",\n  \"assignedToId\": \"{{assignedToId}}\",\n  \"startDate\": \"2026-06-04T00:00:00.000Z\",\n  \"dueDate\": \"2026-06-06T00:00:00.000Z\",\n  \"budgetMinutes\": 210,\n  \"resolution\": \"Root cause under review.\",\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/issues/update/{{issueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "issues",
+                "update",
+                "{{issueId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resolve Issue/Bug",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"RESOLVED\",\n  \"resolution\": \"Fixed DTO optional field handling and added regression coverage.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/issues/update/{{issueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "issues",
+                "update",
+                "{{issueId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Issue/Bug",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/issues/delete/{{issueId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "issues",
+                "delete",
+                "{{issueId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        {
+          "name": "Create Comment For Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) pm.collectionVariables.set('commentId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Please attach the latest API contract before moving this task to review.\",\n  \"targetType\": \"TASK\",\n  \"targetId\": \"{{taskId}}\",\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Comment For Issue/Bug",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Issue reproduced on staging. Please prioritize this before the release demo.\",\n  \"targetType\": \"ISSUE\",\n  \"targetId\": \"{{issueId}}\",\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Comments For Target",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/list?page=1&limit=10&targetType=TASK&targetId={{taskId}}&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "targetType",
+                  "value": "TASK"
+                },
+                {
+                  "key": "targetId",
+                  "value": "{{taskId}}"
+                },
+                {
+                  "key": "projectId",
+                  "value": "{{projectId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "createdById",
+                  "value": "{{userId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Comment By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "{{commentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Comment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Updated: API contract is attached. Please move this task to review after final validation.\",\n  \"targetType\": \"TASK\",\n  \"targetId\": \"{{taskId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/comments/update/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "update",
+                "{{commentId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/comments/delete/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "comments",
+                "delete",
+                "{{commentId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Work Logs",
+      "item": [
+        {
+          "name": "Create Work Log For Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.id) pm.collectionVariables.set('workLogId', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"TASK\",\n  \"targetId\": \"{{taskId}}\",\n  \"logDate\": \"2026-05-31\",\n  \"minutesSpent\": 90,\n  \"description\": \"Implemented checklist validation and service ownership checks.\",\n  \"userId\": \"{{userId}}\",\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Work Log For SubTask",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"SUB_TASK\",\n  \"targetId\": \"{{subTaskId}}\",\n  \"logDate\": \"2026-05-31\",\n  \"minutesSpent\": 45,\n  \"description\": \"Verified subtask DTO behavior.\",\n  \"userId\": \"{{userId}}\",\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Work Log For Issue/Bug",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"ISSUE\",\n  \"targetId\": \"{{issueId}}\",\n  \"logDate\": \"2026-05-31\",\n  \"minutesSpent\": 60,\n  \"description\": \"Investigated issue reproduction and root cause.\",\n  \"userId\": \"{{userId}}\",\n  \"orgId\": \"{{orgId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/create",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "create"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Work Log List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/list?page=1&limit=10&projectId={{projectId}}&fromDate=2026-05-01&toDate=2026-05-31&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "targetType",
+                  "value": "TASK",
+                  "disabled": true
+                },
+                {
+                  "key": "targetId",
+                  "value": "{{taskId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "projectId",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "featureId",
+                  "value": "{{featureId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "taskId",
+                  "value": "{{taskId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "subTaskId",
+                  "value": "{{subTaskId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "issueId",
+                  "value": "{{issueId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "fromDate",
+                  "value": "2026-05-01"
+                },
+                {
+                  "key": "toDate",
+                  "value": "2026-05-31"
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Work Log By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/{{workLogId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "{{workLogId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Work Log",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"TASK\",\n  \"targetId\": \"{{taskId}}\",\n  \"logDate\": \"2026-05-31\",\n  \"minutesSpent\": 120,\n  \"description\": \"Updated work log after additional review and fixes.\",\n  \"userId\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/update/{{workLogId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "update",
+                "{{workLogId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Work Log",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/delete/{{workLogId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "delete",
+                "{{workLogId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Work Log Reports",
+      "item": [
+        {
+          "name": "Daily Work Log Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/daily?date=2026-05-31&projectId={{projectId}}&userId={{userId}}&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "daily"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-05-31"
+                },
+                {
+                  "key": "projectId",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Weekly Work Log Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/weekly?date=2026-05-31&projectId={{projectId}}&userId={{userId}}&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "weekly"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-05-31"
+                },
+                {
+                  "key": "projectId",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Monthly Work Log Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/work-logs/monthly?date=2026-05-31&projectId={{projectId}}&userId={{userId}}&orgId={{orgId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "work-logs",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-05-31"
+                },
+                {
+                  "key": "projectId",
+                  "value": "{{projectId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "orgId",
+                  "value": "{{orgId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
