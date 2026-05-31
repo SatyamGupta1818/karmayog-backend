@@ -22,6 +22,12 @@ import { OrganizationModule } from './modules/organization/organization.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 import { DepartmentsModule } from './modules/departments/departments.module';
 import { ProjectsModule } from './modules/projects/projects.module';
+import { FeaturesModule } from './modules/features/features.module';
+import { TasksModule } from './modules/tasks/tasks.module';
+import { SubTasksModule } from './modules/subtasks/subtasks.module';
+import { IssuesModule } from './modules/issues/issues.module';
+import { CommentsModule } from './modules/comments/comments.module';
+import { WorkLogsModule } from './modules/work-logs/work-logs.module';
 
 @Module({
   imports: [
@@ -55,6 +61,12 @@ import { ProjectsModule } from './modules/projects/projects.module';
     RbacModule,
     DepartmentsModule,
     ProjectsModule,
+    FeaturesModule,
+    TasksModule,
+    SubTasksModule,
+    IssuesModule,
+    CommentsModule,
+    WorkLogsModule,
   ],
   controllers: [AppController],
   providers: [
