@@ -13,6 +13,7 @@ const PROJECT_SORT_COLUMNS = {
   status: 'project.status',
   startDate: 'project.startDate',
   endDate: 'project.endDate',
+  budgetMinutes: 'project.budgetMinutes',
   isActive: 'project.isActive',
   createdAt: 'project.createdAt',
   updatedAt: 'project.updatedAt',
@@ -48,6 +49,7 @@ export class ProjectsService {
       status: createDto.status || ProjectStatus.PLANNING,
       startDate: createDto.startDate,
       endDate: createDto.endDate,
+      budgetMinutes: createDto.budgetMinutes || 0,
       organization: { id: orgId },
       createdBy: { id: createdById },
     });
@@ -93,7 +95,7 @@ export class ProjectsService {
       return cachedData;
     }
 
-    const { page = 1, limit = 10, search, status, departmentId, teamId, memberId, sortBy = 'createdAt', sortOrder = 'DESC' } = query;
+    const { page = 1, limit = 10, search, status, departmentId, teamId, memberId, isActive, sortBy = 'createdAt', sortOrder = 'DESC' } = query;
     const skip = (page - 1) * limit;
 
     const qb = this.projectRepo.createQueryBuilder('project')
@@ -121,6 +123,10 @@ export class ProjectsService {
 
     if (memberId) {
       qb.andWhere('members.id = :memberId', { memberId });
+    }
+
+    if (isActive !== undefined) {
+      qb.andWhere('project.isActive = :isActive', { isActive });
     }
 
     if (search) {
@@ -197,6 +203,7 @@ export class ProjectsService {
     if (updateDto.status !== undefined) project.status = updateDto.status;
     if (updateDto.startDate !== undefined) project.startDate = updateDto.startDate;
     if (updateDto.endDate !== undefined) project.endDate = updateDto.endDate;
+    if (updateDto.budgetMinutes !== undefined) project.budgetMinutes = updateDto.budgetMinutes;
     if (updateDto.isActive !== undefined) project.isActive = updateDto.isActive;
 
     if (updateDto.departmentId !== undefined) {

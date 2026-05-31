@@ -46,6 +46,9 @@ export class Project {
   @Column({ name: 'end_date', type: 'timestamptz', nullable: true })
   endDate?: Date;
 
+  @Column({ name: 'budget_minutes', type: 'int', default: 0 })
+  budgetMinutes: number;
+
   @Index()
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;

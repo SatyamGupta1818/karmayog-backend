@@ -7,6 +7,7 @@ import {
   IsEnum,
   IsBoolean,
   IsDate,
+  IsInt,
   IsNumber,
   Min,
 } from 'class-validator';
@@ -41,6 +42,13 @@ export class CreateProjectDto {
   @IsDate()
   @IsOptional()
   endDate?: Date;
+
+  @ApiPropertyOptional({ example: 12000, description: 'Allocated project time budget in minutes' })
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  budgetMinutes?: number;
 
   @ApiPropertyOptional({ description: 'Department ID associated with the project' })
   @IsUUID(4)
@@ -111,6 +119,11 @@ export class ProjectListQueryDto {
   @IsUUID(4)
   @IsOptional()
   memberId?: string;
+
+  @ApiPropertyOptional({ description: 'Filter active/archived projects' })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 
   @ApiPropertyOptional({ description: 'Field to sort by', default: 'createdAt' })
   @IsString()
