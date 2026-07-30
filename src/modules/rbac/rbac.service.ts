@@ -489,12 +489,14 @@ export class RbacService {
 
     await this.rolePermissionRepo.delete({ roleId });
 
-    const rolePermissions = modulePermissions.map((modulePermission) =>
-      this.rolePermissionRepo.create({
-        roleId,
-        modulePermissionId: modulePermission.id,
-      }),
-    );
+    const rolePermissions = modulePermissions
+      .filter((mp) => requestedPairs.has(`${mp.moduleId}:${mp.permissionId}`))
+      .map((modulePermission) =>
+        this.rolePermissionRepo.create({
+          roleId,
+          modulePermissionId: modulePermission.id,
+        }),
+      );
 
     const saved = await this.rolePermissionRepo.save(rolePermissions);
 
