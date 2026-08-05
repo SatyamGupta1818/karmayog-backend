@@ -71,7 +71,6 @@ async function bootstrap() {
   const apiKeyGuard = new ApiKeyGuard(config);
   app.useGlobalGuards(new CompositeAuthGuard(reflector, jwtGuard, apiKeyGuard));
 
-  // ✅ ADD THIS BLOCK (root health check)
   const server = app.getHttpAdapter().getInstance();
   server.get('/', (req, res) => {
     res.status(200).json({
