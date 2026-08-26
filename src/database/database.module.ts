@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             inject: [ConfigService],
             useFactory: (config: ConfigService) => {
                 const db = config.get('database');
+                const nodeEnv = config.get<string>('NODE_ENV', 'development');
 
                 return {
                     type: 'postgres',
@@ -20,8 +21,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
                     autoLoadEntities: true,
 
-                    synchronize: true,
-                    // logging: ['error'],
+                    // NEVER auto-sync the schema outside local development — it can
+                    // silently drop columns/data. Production uses migrations instead.
+                    synchronize: nodeEnv === 'development',
+                    migrations: ['dist/database/migrations/*.js'],
+                    migrationsRun: nodeEnv === 'production',
+                    logging: ['error'],
                 };
             },
         })

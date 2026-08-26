@@ -36,6 +36,15 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     this.redisClient.quit();
   }
 
+  /** Returns true if Redis responds to PING. Used by the health check. */
+  async ping(): Promise<boolean> {
+    try {
+      return (await this.redisClient.ping()) === 'PONG';
+    } catch {
+      return false;
+    }
+  }
+
   async set(key: string, value: any, ttlSeconds: number): Promise<void> {
     const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
     await this.redisClient.set(key, stringValue, 'EX', ttlSeconds);
@@ -57,10 +66,24 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.redisClient.del(key);
   }
 
+  /**
+   * Deletes all keys matching a pattern using SCAN (non-blocking cursor)
+   * instead of KEYS, which blocks Redis on large keyspaces.
+   */
   async delByPattern(pattern: string): Promise<void> {
-    const keys = await this.redisClient.keys(pattern);
-    if (keys.length > 0) {
-      await this.redisClient.del(...keys);
-    }
+    let cursor = '0';
+    do {
+      const [nextCursor, keys] = await this.redisClient.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        100,
+      );
+      cursor = nextCursor;
+      if (keys.length > 0) {
+        await this.redisClient.del(...keys);
+      }
+    } while (cursor !== '0');
   }
 }

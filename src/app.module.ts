@@ -12,6 +12,7 @@ import { SharedModule } from './shared/shared.module';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { configuration, envValidationSchema } from './configs/env.config';
 import { LoggerModule } from './common/loggers/logger.module';
 import { HttpLoggerMiddleware } from './common/middlewares/http-logger.middleware';
@@ -28,6 +29,7 @@ import { SubTasksModule } from './modules/subtasks/subtasks.module';
 import { IssuesModule } from './modules/issues/issues.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { WorkLogsModule } from './modules/work-logs/work-logs.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -49,12 +51,18 @@ import { WorkLogsModule } from './modules/work-logs/work-logs.module';
             limit: config.get<number>('THROTTLE_LIMIT', 10),
           },
         ],
+        storage: new ThrottlerStorageRedisService({
+          host: config.get<string>('REDIS_HOST', '127.0.0.1'),
+          port: config.get<number>('REDIS_PORT', 6379),
+          password: config.get<string>('REDIS_PASSWORD') || undefined,
+          db: config.get<number>('REDIS_DB', 0),
+        }),
       }),
     }),
 
     LoggerModule,
     DatabaseModule,
-    SharedModule, // <-- Added SharedModule here
+    SharedModule, 
     AuthModule,
     UsersModule,
     OrganizationModule,
@@ -67,6 +75,7 @@ import { WorkLogsModule } from './modules/work-logs/work-logs.module';
     IssuesModule,
     CommentsModule,
     WorkLogsModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [

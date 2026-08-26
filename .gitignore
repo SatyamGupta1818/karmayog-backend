@@ -3,6 +3,10 @@
 /node_modules
 /build
 
+# database dumps — never commit data
+*.sql
+backup.sql
+
 # Logs
 logs
 *.log

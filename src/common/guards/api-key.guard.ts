@@ -6,6 +6,7 @@ import {
     ForbiddenException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { timingSafeEqual } from 'crypto';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
@@ -27,11 +28,19 @@ export class ApiKeyGuard implements CanActivate {
 
         const expectedKey = this.configService.get<string>('API_KEY');
 
-        // Key sent but wrong
-        if (apiKey !== expectedKey) {
+        // Constant-time comparison to avoid leaking the key via timing.
+        if (!expectedKey || !this.safeEqual(apiKey, expectedKey)) {
             throw new ForbiddenException('Invalid API key.');
         }
 
         return true;
+    }
+
+    private safeEqual(a: string, b: string): boolean {
+        const bufA = Buffer.from(a);
+        const bufB = Buffer.from(b);
+        // timingSafeEqual throws on length mismatch — guard first (length is not secret).
+        if (bufA.length !== bufB.length) return false;
+        return timingSafeEqual(bufA, bufB);
     }
 }
