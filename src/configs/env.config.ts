@@ -17,11 +17,25 @@ export const envValidationSchema = Joi.object({
     DB_PASS: Joi.string().required(),
     DB_NAME: Joi.string().required(),
 
-    JWT_SECRET: Joi.string().required(),
-    JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30),
-    JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30),
+    // Secrets the app actually uses to sign/verify tokens. Required so the
+    // app fails fast at boot instead of falling back to an unsafe default.
+    JWT_ACCESS_SECRET: Joi.string().min(32).required(),
+    JWT_REFRESH_SECRET: Joi.string().min(32).required(),
+    JWT_ACCESS_EXPIRES_IN: Joi.string().default('15m'),
+    JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
 
     API_KEY: Joi.string().required(),
+
+    // Comma-separated list of allowed browser origins for CORS.
+    CORS_ORIGINS: Joi.string().default('http://localhost:5173,http://localhost:5174'),
+
+    REDIS_HOST: Joi.string().default('127.0.0.1'),
+    REDIS_PORT: Joi.number().default(6379),
+    REDIS_PASSWORD: Joi.string().allow('').optional(),
+    REDIS_DB: Joi.number().default(0),
+
+    THROTTLE_TTL: Joi.number().default(60000),
+    THROTTLE_LIMIT: Joi.number().default(10),
 
     MAIL_HOST: Joi.string().required(),
     MAIL_PORT: Joi.string().required(),
@@ -50,15 +64,17 @@ export const configuration = () => ({
     },
 
     jwt: {
-        secret: process.env.JWT_SECRET,
-        accessExpirationMinutes: Number(
-            process.env.JWT_ACCESS_EXPIRATION_MINUTES,
-        ),
-        refreshExpirationDays: Number(
-            process.env.JWT_REFRESH_EXPIRATION_DAYS,
-        ),
         accessSecret: process.env.JWT_ACCESS_SECRET,
-        refreshSecret: process.env.JWT_REFRESH_SECRET
+        refreshSecret: process.env.JWT_REFRESH_SECRET,
+        accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
+        refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+    },
+
+    cors: {
+        origins: (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174')
+            .split(',')
+            .map((o) => o.trim())
+            .filter(Boolean),
     },
 
     redis: {

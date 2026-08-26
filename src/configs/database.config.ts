@@ -3,6 +3,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 export const getDatabaseConfig = (config: ConfigService,): TypeOrmModuleOptions => {
     const db = config.get('database');
+    const nodeEnv = config.get<string>('NODE_ENV', 'development');
     return {
         type: 'postgres',
         host: db.host,
@@ -12,7 +13,10 @@ export const getDatabaseConfig = (config: ConfigService,): TypeOrmModuleOptions 
         database: db.name,
 
         autoLoadEntities: true,
-        synchronize: true,
+        // Auto-sync only in local dev; production relies on migrations.
+        synchronize: nodeEnv === 'development',
+        migrations: ['dist/database/migrations/*.js'],
+        migrationsRun: nodeEnv === 'production',
         logging: false,
     };
 };

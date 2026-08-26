@@ -30,9 +30,9 @@ services:
     restart: unless-stopped
 
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: task_tracker
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:?DB_PASS is required}
+      POSTGRES_DB: ${DB_NAME:-task_tracker}
 
     ports:
       - "5433:5432"

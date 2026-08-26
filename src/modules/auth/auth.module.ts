@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ApiKeyGuard } from '../../common/guards/api-key.guard';
 import { CompositeAuthGuard } from '../../common/guards/auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { JwtAccessStrategy } from './strategies/access-tokern.strategy';
 import { JwtRefreshStrategy } from './strategies/refresh-token.strategy';
 import { JwtRefreshGuard } from '../../common/guards/jwt-refresh.guard';
@@ -55,6 +56,10 @@ import { JwtRefreshGuard } from '../../common/guards/jwt-refresh.guard';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
     },
   ],
   exports: [

@@ -9,15 +9,12 @@ import { AuthenticatedUser } from '../auth/interfaces/jwt-payload.interface';
 @ApiBearerAuth()
 @Controller('projects')
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(private readonly projectsService: ProjectsService) { }
 
   @Post('create')
   @ApiOperation({ summary: 'Create a new project' })
   @ApiResponse({ status: 201, description: 'Project successfully created.' })
-  create(
-    @Body() createProjectDto: CreateProjectDto,
-    @GetCurrentUser() user: AuthenticatedUser
-  ) {
+  create(@Body() createProjectDto: CreateProjectDto, @GetCurrentUser() user: AuthenticatedUser) {
     const orgId = user.roles.includes('SUPER_ADMIN') ? (user.orgId || createProjectDto.orgId) : user.orgId;
     return this.projectsService.create(createProjectDto, orgId as string, user.userId);
   }

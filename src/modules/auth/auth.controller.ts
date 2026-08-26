@@ -14,6 +14,7 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 import { AuthService } from './auth.service';
 
@@ -65,6 +66,7 @@ export class AuthController {
   // ──────────────────────────────────────────────────────────────────────────
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('request-otp')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -86,6 +88,7 @@ export class AuthController {
   // ──────────────────────────────────────────────────────────────────────────
 
   @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('verify-otp')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -107,6 +110,7 @@ export class AuthController {
   // ──────────────────────────────────────────────────────────────────────────
 
   @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('resend-otp')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

@@ -11,10 +11,8 @@ import {
 } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-execptions.filters';
-import { ApiKeyGuard } from './common/guards/api-key.guard';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { CompositeAuthGuard } from './common/guards/auth.guard';
 
 const compression = require('compression');
 const helmet = require('helmet');
@@ -38,7 +36,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: config.get<string>('CORS_ORIGIN', 'http://localhost:5173'),
+    origin: config.get<string[]>('cors.origins') ?? ['http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
     credentials: true,
@@ -62,16 +60,22 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
+  // Order matters: ClassSerializer must be innermost so entities are serialized
+  // (@Exclude applied) BEFORE TransformInterceptor wraps them in the envelope.
   app.useGlobalInterceptors(
     new LoggingInterceptor(),
+    new TransformInterceptor(reflector),
     new ClassSerializerInterceptor(reflector),
   );
 
-  const jwtGuard = new JwtAuthGuard();
-  const apiKeyGuard = new ApiKeyGuard(config);
-  app.useGlobalGuards(new CompositeAuthGuard(reflector, jwtGuard, apiKeyGuard));
+  // NOTE: CompositeAuthGuard and RolesGuard/PermissionsGuard are registered as
+  // APP_GUARD providers in AuthModule (DI-managed). Do not also register them
+  // here — that would run the auth guard twice per request.
 
-  // ✅ ADD THIS BLOCK (root health check)
+  // Gracefully close DB/Redis connections on SIGTERM/SIGINT.
+  app.enableShutdownHooks();
+
+  // Root liveness ping (kept simple; deep checks live at /api/v1/health).
   const server = app.getHttpAdapter().getInstance();
   server.get('/', (req, res) => {
     res.status(200).json({
@@ -83,8 +87,8 @@ async function bootstrap() {
   // Swagger
   if (nodeEnv !== 'production') {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('HealthCare API')
-      .setDescription('HealthCare Backend REST API Documentation')
+      .setTitle('Karmayog API')
+      .setDescription('Karmayog Backend REST API Documentation')
       .setVersion('1.0')
       .addBearerAuth(
         {
@@ -118,7 +122,7 @@ async function bootstrap() {
     });
   }
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   const logger = new Logger('Bootstrap');
   logger.log(`Environment  : ${nodeEnv}`);
