@@ -6,6 +6,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Request,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -126,11 +128,11 @@ export class AuthController {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // PROTECTED (Refresh Token): Refresh Tokens
+  // PUBLIC: Refresh Tokens
   // POST /auth/refresh
   // ──────────────────────────────────────────────────────────────────────────
 
-  @UseGuards(JwtRefreshGuard)
+  @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth('refresh-token')
@@ -138,18 +140,12 @@ export class AuthController {
     summary: 'Rotate tokens using a valid refresh token',
     description:
       'Pass the refresh token in the Authorization header as a Bearer token. ' +
-      'Returns a new access token and a new refresh token (rotation). ' +
-      'The old refresh token is immediately invalidated.',
+      'Returns a new access token and a new refresh token (rotation).',
   })
   @ApiResponse({ status: 200, type: TokensResponseDto })
-  @ApiResponse({ status: 403, description: 'Invalid or expired refresh token' })
-  async refreshTokens(
-    @GetCurrentUser('userId') userId: string,
-    @GetCurrentUser('email') email: string,
-    @GetCurrentUser('roles') roles: string[],
-    @GetCurrentUser('refreshToken') refreshToken: string,
-  ): Promise<TokensResponseDto> {
-    return this.authService.refreshTokens(userId, email, roles, refreshToken);
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+  async refresh(@Request() req): Promise<TokensResponseDto> {
+    return this.authService.refreshTokens(req);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -13,6 +13,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import * as jwt from 'jsonwebtoken';
+import type { SignOptions } from 'jsonwebtoken';
 
 import { JwtPayload, Tokens } from './interfaces/jwt-payload.interface';
 import { User } from '../users/entities/user.entity';
@@ -302,37 +304,53 @@ export class AuthService {
   // POST /auth/refresh  (protected by JwtRefreshGuard)
   // ──────────────────────────────────────────────────────────────────────────
 
-  async refreshTokens(userId: string, email: string, roles: string[], incomingRefreshToken: string): Promise<TokensResponseDto> {
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.organization', 'organization')
-      .addSelect('user.hashedRefreshToken')
-      .where('user.id = :id AND user.isActive = :isActive', {
-        id: userId,
-        isActive: true,
-      })
-      .getOne();
+  async refreshTokens(req: any): Promise<TokensResponseDto> {
+    try {
+      // 1. Extract refresh token from Authorization header
+      const authHeader = req.headers.authorization;
+      const refreshToken = authHeader?.split(' ')[1];
 
-    if (!user || !user.hashedRefreshToken) {
-      throw new ForbiddenException('Access denied. Please log in again.');
-    }
+      if (!refreshToken) {
+        throw new UnauthorizedException('No refresh token provided');
+      }
 
-    const tokenMatches = await bcrypt.compare(incomingRefreshToken, user.hashedRefreshToken,
-    );
+      // 2. Verify with REFRESH_TOKEN_SECRET
+      const decoded = jwt.verify(
+        refreshToken,
+        this.refreshSecret,
+      ) as any;
 
-    if (!tokenMatches) {
-      await this.userRepository.update(userId, { hashedRefreshToken: null });
-      this.logger.warn(`Refresh token reuse detected for user: ${userId}`);
-      throw new ForbiddenException(
-        'Refresh token already used or invalid. Please log in again.',
+      // 3. Issue new access token (15 minutes)
+      const accessOptions: SignOptions = { expiresIn: this.accessExpiresIn as any };
+      const newAccessToken = jwt.sign(
+        {
+          sub: decoded.sub,
+          email: decoded.email,
+          roles: decoded.roles,
+          orgId: decoded.orgId,
+        },
+        this.accessSecret as string,
+        accessOptions,
       );
+
+      // 4. Issue new refresh token (7 days)
+      const refreshOptions: SignOptions = { expiresIn: this.refreshExpiresIn as any };
+      const newRefreshToken = jwt.sign(
+        { sub: decoded.sub, email: decoded.email, orgId: decoded.orgId },
+        this.refreshSecret as string,
+        refreshOptions,
+      );
+
+      // 5. Return both tokens
+      this.logger.log(`Tokens refreshed for user: ${decoded.sub}`);
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    } catch (error) {
+      this.logger.error(`[Refresh] Failed: ${error.message}`);
+      throw new UnauthorizedException('Invalid refresh token');
     }
-
-    const tokens = await this.generateTokens(userId, email, roles, user.organization?.id);
-    await this.storeRefreshToken(userId, tokens.refreshToken);
-
-    this.logger.log(`Tokens refreshed for user: ${userId}`);
-    return tokens;
   }
 
   async switchOrganization(userId: string, roles: string[], orgId: string): Promise<TokensResponseDto> {
