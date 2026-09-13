@@ -320,6 +320,20 @@ export class AuthService {
         this.refreshSecret,
       ) as any;
 
+      const user = await this.userRepository.findOne({
+        where: { id: decoded.sub, isActive: true },
+        select: ['id', 'hashedRefreshToken', 'isActive'],
+      });
+
+      if (!user || !user.hashedRefreshToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const isValidRefreshToken = await bcrypt.compare(refreshToken, user.hashedRefreshToken);
+      if (!isValidRefreshToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
       // 3. Issue new access token (15 minutes)
       const accessOptions: SignOptions = { expiresIn: this.accessExpiresIn as any };
       const newAccessToken = jwt.sign(
@@ -333,13 +347,16 @@ export class AuthService {
         accessOptions,
       );
 
-      // 4. Issue new refresh token (7 days)
+      // 4. Issue a new refresh token (7 days) and rotate the server-side hash.
       const refreshOptions: SignOptions = { expiresIn: this.refreshExpiresIn as any };
       const newRefreshToken = jwt.sign(
-        { sub: decoded.sub, email: decoded.email, orgId: decoded.orgId },
+        { sub: decoded.sub, email: decoded.email, roles: decoded.roles, orgId: decoded.orgId },
         this.refreshSecret as string,
         refreshOptions,
       );
+
+      const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
+      await this.userRepository.update(decoded.sub, { hashedRefreshToken });
 
       // 5. Return both tokens
       this.logger.log(`Tokens refreshed for user: ${decoded.sub}`);
@@ -348,7 +365,11 @@ export class AuthService {
         refreshToken: newRefreshToken,
       };
     } catch (error) {
-      this.logger.error(`[Refresh] Failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(`[Refresh] Failed: ${message}`);
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
