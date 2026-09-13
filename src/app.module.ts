@@ -30,7 +30,7 @@ import { IssuesModule } from './modules/issues/issues.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { WorkLogsModule } from './modules/work-logs/work-logs.module';
 import { HealthModule } from './modules/health/health.module';
-import { NotificationModule } from './modules/notification/notification.module';
+
 
 @Module({
   imports: [
@@ -77,7 +77,6 @@ import { NotificationModule } from './modules/notification/notification.module';
     CommentsModule,
     WorkLogsModule,
     HealthModule,
-    NotificationModule,
   ],
   controllers: [AppController],
   providers: [
